@@ -285,17 +285,49 @@ async function gText(prompt,json){
   try{return JSON.parse(t);}catch(e){throw new Error('Gemini ne sahi JSON nahi diya — Retry dabao.');}}
  return t;
 }
+async function iCall(body){
+ const k=gkey();
+ if(!k){const e=new Error('NO_KEY');e.noKey=true;throw e;}
+ const waits=[8000,20000,45000];let att=0;
+ while(true){
+ const r=await fetch('https://generativelanguage.googleapis.com/v1beta/interactions',{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':k},body:JSON.stringify(body)});
+ const d=await r.json().catch(()=>({}));
+ if(r.status===429&&att<waits.length){
+  let w=waits[att++];try{const ra=r.headers.get('retry-after');const n=parseInt(ra,10);if(n>0&&n<=120)w=n*1000;}catch(e){}
+  let cp=0;try{cp=parseInt(($('#gpPct')||{}).textContent)||0;}catch(e){}
+  for(let t=Math.ceil(w/1000);t>0;t--){try{gpSet(cp,'Gemini','⏳ Quota full — '+t+'s me auto-retry...');}catch(e){}await sleep(1000);}
+  continue;}
+ if(!r.ok){const e=new Error(gMsg(r.status,d,'Gemini'));e.status=r.status;throw e;}
+ return d;
+ }
+}
+function iContent(d,type){
+ try{
+  const steps=d.steps||[];
+  for(let s=steps.length-1;s>=0;s--){const c=steps[s].content||[];for(let i=c.length-1;i>=0;i--){if(c[i]&&c[i].type===type&&c[i].data)return c[i];}}
+  if(type==='image'&&d.output_image&&d.output_image.data)return{data:d.output_image.data,mime_type:'image/png'};
+  if(type==='audio'&&d.output_audio&&d.output_audio.data)return{data:d.output_audio.data,mime_type:'audio/wav'};
+ }catch(e){}
+ return null;
+}
+async function iCallAuto(kind,body){
+ const cur=kind==='img'?gimgmodel():gttsmodel();const lk=kind==='img'?LS.gi:LS.gt;
+ const cands=[];[cur].concat(FALLBACKS[kind]).forEach(function(m){if(cands.indexOf(m)<0)cands.push(m);});
+ let last=null;
+ for(const m of cands){try{const dd={};for(const kk in body)dd[kk]=body[kk];dd.model=m;const d=await iCall(dd);if(m!==cur){try{localStorage.setItem(lk,m);}catch(e){}}return d;}catch(e){if(e&&e.status===404){last=e;continue;}throw e;}}
+ throw last;
+}
 async function gImage(prompt){
- const d=await gCallAuto('img',{contents:[{parts:[{text:prompt}]}],generationConfig:{responseModalities:['TEXT','IMAGE']}},'Image');
- const p=gParts(d).find(p=>p.inlineData&&/^image\//.test(p.inlineData.mimeType||''));
- if(!p)throw new Error('Gemini ne image nahi di (safety filter ya quota ho sakta hai) — Retry dabao.');
- return{mime:p.inlineData.mimeType,data:p.inlineData.data};
+ const d=await iCallAuto('img',{input:[{type:'text',text:prompt}]});
+ const c=iContent(d,'image');
+ if(!c||!c.data)throw new Error('Gemini ne image nahi di (safety filter ya quota ho sakta hai) — Retry dabao.');
+ return{mime:(c.mime_type||'image/png'),data:c.data};
 }
 async function gTTS(text,voice){
- const d=await gCallAuto('tts',{contents:[{parts:[{text:text}]}],generationConfig:{responseModalities:['AUDIO'],speechConfig:{voiceConfig:{prebuiltVoiceConfig:{voiceName:voice}}}}},'Voice');
- const p=gParts(d).find(p=>p.inlineData&&/^audio\//.test(p.inlineData.mimeType||''));
- if(!p)throw new Error('Gemini ne audio nahi diya — Retry dabao.');
- return{mime:p.inlineData.mimeType,data:p.inlineData.data};
+ const d=await iCallAuto('tts',{input:[{type:'user_input',content:[{type:'text',text:text}]}],response_format:{type:'audio'},generation_config:{speech_config:[{voice:voice}]}});
+ const c=iContent(d,'audio');
+ if(!c||!c.data)throw new Error('Gemini ne audio nahi diya — Retry dabao.');
+ return{mime:(c.mime_type||'audio/wav'),data:c.data};
 }
 /* ============ media helpers ============ */
 function b64ToBlob(b64,mime){const bin=atob(b64);const u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return new Blob([u],{type:mime});}
@@ -593,7 +625,7 @@ async function genVideos(prompt){
   const scenes=list.map(s=>{const o={narration:String(s.narration||'').trim(),visual:String(s.visual||'').trim(),caption:String(s.caption||'').trim(),start:+t.toFixed(2),end:+(t+per).toFixed(2)};t+=per;return o;});
   if(!scenes.every(s=>s.narration&&s.visual))throw new Error('Kuch scenes adhoore aaye — dobara try karo.');
   // voice
-  const voice=UI.voice==='male'?'Charon':'Aoede';
+  const voice=UI.voice==='male'?'Puck':'Kore';
   const audioBufs=[];let shift=0;
   for(let i=0;i<scenes.length;i++){
    const s=scenes[i],txt=ttsText(s.narration);
