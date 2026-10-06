@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>CreatorPilot AI — AI YouTube Studio</title>
+<style>
+:root{--bg:#0a0a0d;--bg2:#101016;--card:#14141b;--card2:#1a1a22;--line:#26262f;--gold:#d4af37;--gold2:#f5d76e;--gold-dim:#8a7326;--txt:#f5f3ea;--mut:#a7a7b3;--dim:#6d6d78;--ok:#3ecf6e;--bad:#ff5d5d;--warn:#ffb020;--info:#5db4ff;--r:14px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,Arial,sans-serif;font-size:15px;line-height:1.55;-webkit-tap-highlight-color:transparent}
+a{color:var(--gold2);text-decoration:none}
+.wrap{max-width:1080px;margin:0 auto;padding:0 16px 90px}
+/* header */
+.hdr{position:sticky;top:0;z-index:50;background:rgba(10,10,13,.94);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.hdr-in{max-width:1080px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;gap:14px}
+.logo{display:flex;align-items:center;gap:9px;font-weight:800;font-size:18px;letter-spacing:.3px}
+.logo .mk{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,var(--gold2),var(--gold) 60%,#9c7a1e);display:flex;align-items:center;justify-content:center;color:#141414;font-weight:900;font-size:17px}
+.logo b{background:linear-gradient(90deg,var(--gold2),var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent}
+.nav{display:flex;gap:4px;margin-left:8px;flex:1;overflow-x:auto}
+.nav a{color:var(--mut);padding:8px 12px;border-radius:9px;font-size:14px;white-space:nowrap}
+.nav a.on,.nav a:hover{color:var(--gold2);background:#1c1a12}
+.huser{font-size:12.5px;color:var(--dim);max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* buttons/inputs */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;border:1px solid var(--line);background:var(--card2);color:var(--txt);padding:10px 16px;border-radius:11px;font-size:14px;font-weight:600;cursor:pointer;transition:.15s}
+.btn:hover{border-color:var(--gold-dim)}
+.btn.primary{background:linear-gradient(135deg,var(--gold2),var(--gold));border:none;color:#191904;font-weight:800}
+.btn.primary:hover{filter:brightness(1.06)}
+.btn.danger{color:#ff8f8f;border-color:#4a2424}
+.btn.sm{padding:6px 11px;font-size:12.5px;border-radius:9px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:12.5px;color:var(--mut);margin-bottom:6px;font-weight:600;letter-spacing:.2px}
+.inp,select.inp,textarea.inp{width:100%;background:#0e0e13;border:1px solid var(--line);color:var(--txt);border-radius:11px;padding:11px 13px;font-size:14.5px;font-family:inherit}
+.inp:focus{outline:none;border-color:var(--gold)}
+textarea.inp{min-height:90px;resize:vertical}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+/* cards */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin:18px 0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px 14px;cursor:pointer;transition:.15s}
+.card:hover{border-color:var(--gold-dim);transform:translateY(-1px)}
+.card .ic{font-size:24px;margin-bottom:8px}
+.card .t{font-weight:700;font-size:14px}
+.card .s{font-size:12px;color:var(--dim);margin-top:3px}
+.card.gold{background:linear-gradient(135deg,#2a2210,#1a1608);border-color:var(--gold-dim)}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px;margin:16px 0}
+.panel h2{font-size:16px;margin-bottom:4px}
+.panel h3{font-size:14.5px;margin:18px 0 10px;color:var(--gold2)}
+.ph-sub{font-size:13px;color:var(--dim);margin-bottom:12px}
+/* project list */
+.proj{display:flex;gap:13px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:13px 14px;margin-bottom:11px}
+.thumb{width:64px;height:64px;border-radius:11px;flex:none;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800;color:#191904;background:linear-gradient(135deg,var(--gold2),var(--gold) 65%,#8a6d1c)}
+.pmain{flex:1;min-width:0}
+.ptitle{font-weight:700;font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pmeta{font-size:12px;color:var(--dim);margin-top:3px;display:flex;gap:10px;flex-wrap:wrap}
+.pbar{height:6px;background:#0c0c10;border-radius:4px;margin-top:8px;overflow:hidden}
+.pbar i{display:block;height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));border-radius:4px}
+.pact{display:flex;gap:6px;flex:none;flex-wrap:wrap;justify-content:flex-end}
+.badge{display:inline-block;font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;letter-spacing:.3px}
+.b-draft{background:#23232c;color:var(--mut)}.b-processing{background:#3a2c10;color:var(--gold2)}.b-completed{background:#12351f;color:var(--ok)}.b-failed{background:#3d1717;color:#ff8f8f}
+.b-queued{background:#23232c;color:var(--mut)}.b-retrying{background:#2c2340;color:#c9a7ff}
+/* stepper */
+.steps{display:flex;flex-direction:column;gap:0;margin:6px 0}
+.step{display:flex;gap:12px;align-items:flex-start;padding:11px 4px;border-left:2px solid var(--line);margin-left:9px;padding-left:18px;position:relative}
+.step .dot{position:absolute;left:-8px;top:14px;width:14px;height:14px;border-radius:50%;background:#2a2a33;border:2px solid var(--dim)}
+.step.s-completed .dot{background:var(--ok);border-color:var(--ok)}
+.step.s-failed .dot{background:var(--bad);border-color:var(--bad)}
+.step.s-processing .dot{background:var(--gold);border-color:var(--gold)}
+.step .sn{font-weight:700;font-size:14px}
+.step .sd{font-size:12.5px;color:var(--dim)}
+.step .row{display:flex;align-items:center;gap:8px;flex:1;flex-wrap:wrap}
+.step .grow{flex:1;min-width:140px}
+/* scenes */
+.scene{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:13px 14px;margin-bottom:10px}
+.scene .sh{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.scene .sid{font-weight:800;color:var(--gold2);font-size:13.5px}
+.scene .stm{font-size:12px;color:var(--dim)}
+.scene .kv{font-size:13px;margin:5px 0}
+.scene .kv b{color:var(--gold2);font-weight:600;display:inline-block;min-width:74px;font-size:12px}
+.vres{border-radius:11px;padding:12px 14px;margin:10px 0;font-size:13.5px}
+.vres.ok{background:#0f2a1a;border:1px solid #1d5c36;color:#bfe9cd}
+.vres.no{background:#2e1414;border:1px solid #5c2323;color:#f3c1c1}
+.vres.warn{background:#2e2410;border:1px solid #5c4a1d;color:#f0dcae}
+.vres ul{margin:6px 0 0 18px}
+/* misc */
+.note{background:#141310;border:1px dashed var(--gold-dim);border-radius:11px;padding:12px 14px;font-size:13px;color:var(--mut);margin:12px 0}
+.note b{color:var(--gold2)}
+table.tbl{width:100%;border-collapse:collapse;font-size:13px}
+table.tbl th{text-align:left;color:var(--dim);font-weight:600;padding:8px;border-bottom:1px solid var(--line);font-size:12px}
+table.tbl td{padding:9px 8px;border-bottom:1px solid #1c1c24;vertical-align:top}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:100;display:flex;align-items:center;justify-content:center;padding:16px}
+.modal{background:var(--bg2);border:1px solid var(--line);border-radius:16px;max-width:640px;width:100%;max-height:86vh;overflow:auto;padding:20px}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:26px;background:#1e1e26;border:1px solid var(--gold-dim);color:var(--txt);padding:11px 18px;border-radius:12px;font-size:13.5px;z-index:200;box-shadow:0 8px 30px rgba(0,0,0,.5);max-width:92vw;text-align:center}
+.empty{text-align:center;color:var(--dim);padding:34px 16px;font-size:14px}
+.hero{background:linear-gradient(135deg,#1d1708,#0e0c05);border:1px solid var(--gold-dim);border-radius:18px;padding:26px 22px;margin:18px 0}
+.hero h1{font-size:24px;margin-bottom:8px}
+.hero h1 b{background:linear-gradient(90deg,var(--gold2),var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{color:var(--mut);font-size:14px;max-width:640px}
+.authbox{max-width:420px;margin:40px auto}
+.tabs{display:flex;gap:8px;margin-bottom:18px}
+.tabs button{flex:1}
+pre.code{background:#0c0c10;border:1px solid var(--line);border-radius:10px;padding:12px;font-size:12px;overflow:auto;white-space:pre-wrap;color:#d8d8e0}
+.copyrow{display:flex;gap:8px;align-items:flex-start;margin-bottom:10px}
+.copyrow pre{flex:1}
+@media(max-width:720px){.grid2{grid-template-columns:1fr}.nav a{padding:8px 9px;font-size:13px}.huser{display:none}.proj{flex-wrap:wrap}.pact{width:100%;justify-content:flex-start}.hero h1{font-size:20px}.cards{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<header class="hdr"><div class="hdr-in">
+<div class="logo"><span class="mk">C</span><b>CreatorPilot&nbsp;AI</b></div>
+<nav class="nav" id="nav"></nav>
+<span class="huser" id="huser"></span>
+<span id="hact"></span>
+</div></header>
+<div class="wrap"><div id="app"></div></div>
+<div id="modal"></div>
+<script>
+'use strict';
+/* ============ config ============ */
+const SB_URL='https://jhpimqhbbbzuglhpnxha.supabase.co';
+const SB_KEY='sb_publishable_bw_b2sOM1UUuWCuPb3yyQQ_6BonzaBi';
+const STEPS=[['research','Research'],['script','Script'],['scene','Scene Plan'],['visual','Visuals'],['voice','Voice'],['caption','Captions'],['render','Render'],['thumbnail','Thumbnail'],['upload','YouTube Upload']];
+const AI_WAIT=new Set(['research','visual','voice','render','thumbnail','upload']); // need Phase-2 AI services
+/* ============ tiny supabase client (fetch; no dependency) ============ */
+const ses={
+ get(){try{return JSON.parse(localStorage.getItem('cp_session')||'null')}catch(e){return null}},
+ set(v){v?localStorage.setItem('cp_session',JSON.stringify(v)):localStorage.removeItem('cp_session')}
+};
+async function authReq(path,opts){
+ opts=opts||{};
+ const r=await fetch(SB_URL+'/auth/v1'+path,Object.assign({headers:{apikey:SB_KEY,'Content-Type':'application/json'}},opts));
+ const d=await r.json().catch(()=>({}));
+ if(!r.ok)throw new Error(d.msg||d.message||d.error_description||d.error||('Auth failed ('+r.status+')'));
+ return d;
+}
+async function api(method,path,body,prefer){
+ const s=ses.get(),h={apikey:SB_KEY};
+ if(s&&s.access_token)h['Authorization']='Bearer '+s.access_token;
+ if(body!==undefined)h['Content-Type']='application/json';
+ if(prefer)h['Prefer']=prefer;
+ const r=await fetch(SB_URL+'/rest/v1/'+path,{method:method,headers:h,body:body===undefined?undefined:JSON.stringify(body)});
+ const t=await r.text();let d=null;try{d=t?JSON.parse(t):null}catch(e){}
+ if(!r.ok)throw new Error((d&&(d.message||d.hint))||('Request failed ('+r.status+')'));
+ return d;
+}
+const R={
+ get:p=>api('GET',p),
+ post:(p,b)=>api('POST',p,b,'return=representation'),
+ patch:(p,b)=>api('PATCH',p,b,'return=representation'),
+ del:p=>api('DELETE',p)
+};
+const enc=encodeURIComponent;
+let _user=null;
+async function me(force){
+ if(_user&&!force)return _user;
+ let s=ses.get();if(!s)return null;
+ if(s.expires_at*1000<Date.now()+60000){
+  try{const d=await authReq('/token?grant_type=refresh_token',{method:'POST',body:JSON.stringify({refresh_token:s.refresh_token})});ses.set(d);s=d;}
+  catch(e){ses.set(null);_user=null;return null;}
+ }
+ try{_user=await authReq('/user',{headers:{apikey:SB_KEY,Authorization:'Bearer '+s.access_token}});}
+ catch(e){_user=null;}
+ return _user;
+}
+async function ensureProfile(u){
+ const ex=await R.get('profiles?select=id&id=eq.'+u.id).catch(()=>[]);
+ if(!ex||!ex.length){
+  const base=((u.email||'user').split('@')[0]||'user').replace(/[^a-z0-9_]/gi,'').slice(0,30)||'user';
+  await R.post('profiles',{id:u.id,username:base,display_name:base}).catch(()=>{});
+ }
+}
+/* ============ ui helpers ============ */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function toast(m,ms){const t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),ms||2600);}
+function fmtDur(s){s=Math.round(s||0);return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');}
+function fmtDate(d){try{return new Date(d).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})}catch(e){return ''}}
+function stBadge(s){return '<span class="badge b-'+s+'">'+s+'</span>'}
+function openModal(html){$('#modal').innerHTML='<div class="modal-bg" onclick="if(event.target===this)closeModal()"><div class="modal">'+html+'</div></div>';}
+function closeModal(){$('#modal').innerHTML='';}
+window.closeModal=closeModal;
+function copyTxt(id){const el=document.getElementById(id);if(!el)return;const t=el.innerText||el.value||'';navigator.clipboard.writeText(t).then(()=>toast('Copied')).catch(()=>toast('Copy failed'));}
+window.copyTxt=copyTxt;
+function dl(name,text){const b=new Blob([text],{type:'text/plain'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),4000);}
+window.dl=dl;
+/* ============ router ============ */
+const app=()=>document.getElementById('app');
+function setNav(route){
+ const u=_user;
+ const links=[['dashboard','Dashboard'],['create','＋ Create'],['channel','Channel'],['analytics','Analytics']];
+ $('#nav').innerHTML=u?links.map(l=>'<a href="#/'+l[0]+'" class="'+(route===l[0]?'on':'')+'">'+l[1]+'</a>').join(''):'';
+ $('#huser').textContent=u?(u.email||''):'';
+ $('#hact').innerHTML=u?'<button class="btn sm" onclick="doLogout()">Logout</button>':'';
+}
+window.doLogout=async()=>{const s=ses.get();if(s)await authReq('/logout',{method:'POST',headers:{apikey:SB_KEY,Authorization:'Bearer '+s.access_token}}).catch(()=>{});ses.set(null);_user=null;location.hash='#/login';};
+function parseHash(){const h=(location.hash||'#/dashboard').replace(/^#\/?/,'');const qi=h.indexOf('?');return{path:qi<0?h:h.slice(0,qi),q:qi<0?{}:Object.fromEntries(new URLSearchParams(h.slice(qi+1)))};}
+async function nav(){
+ const{path,q}=parseHash();const seg=path.split('/');const page=seg[0]||'dashboard';
+ if(page!=='login'){const u=await me();if(!u){location.hash='#/login';return;}await ensureProfile(u);}
+ setNav(page);
+ try{
+  if(page==='login')pgAuth();
+  else if(page==='dashboard')await pgDash(q);
+  else if(page==='create')pgCreate();
+  else if(page==='project')await pgProject(seg[1]);
+  else if(page==='channel')await pgChannel();
+  else if(page==='analytics')await pgAnalytics();
+  else app().innerHTML='<div class="empty">Page not found.</div>';
+ }catch(e){app().innerHTML='<div class="vres no"><b>Error:</b> '+esc(e.message)+'</div>';}
+ window.scrollTo(0,0);
+}
+window.addEventListener('hashchange',nav);
+/* ============ auth ============ */
+function pgAuth(){
+ setNav('login');
+ app().innerHTML=`<div class="authbox"><div class="hero" style="text-align:center"><h1>Creator<b>Pilot</b> AI</h1><p>Topic se YouTube video tak — deterministic AI pipeline studio.</p></div>
+ <div class="panel"><div class="tabs"><button class="btn sm primary" id="tL">Login</button><button class="btn sm" id="tS">Sign up</button></div>
+ <div class="field"><label>Email</label><input class="inp" id="aEmail" type="email" placeholder="you@example.com"></div>
+ <div class="field"><label>Password</label><input class="inp" id="aPass" type="password" placeholder="••••••••"></div>
+ <button class="btn primary" id="aGo" style="width:100%">Login</button>
+ <div id="aErr" style="color:#ff8f8f;font-size:13px;margin-top:10px"></div></div></div>`;
+ let mode='login';
+ const setM=m=>{mode=m;$('#tL').className='btn sm'+(m==='login'?' primary':'');$('#tS').className='btn sm'+(m==='signup'?' primary':'');$('#aGo').textContent=m==='login'?'Login':'Create account';};
+ $('#tL').onclick=()=>setM('login');$('#tS').onclick=()=>setM('signup');
+ $('#aGo').onclick=async()=>{
+  const em=$('#aEmail').value.trim(),pw=$('#aPass').value;$('#aErr').textContent='';
+  if(!em||!pw){$('#aErr').textContent='Email and password required.';return;}
+  $('#aGo').disabled=true;
+  try{
+   const d=mode==='login'
+    ?await authReq('/token?grant_type=password',{method:'POST',body:JSON.stringify({email:em,password:pw})})
+    :await authReq('/signup',{method:'POST',body:JSON.stringify({email:em,password:pw})});
+   if(!d.access_token)throw new Error('No session returned — check Supabase Auth settings.');
+   ses.set(d);_user=null;await me(true);await ensureProfile(_user);
+   toast(mode==='login'?'Welcome back!':'Account created!');location.hash='#/dashboard';
+  }catch(e){$('#aErr').textContent=e.message;}
+  $('#aGo').disabled=false;
+ };
+}
+/* ============ dashboard ============ */
+const FILTERS={all:'My Projects',processing:'Processing',completed:'Completed',failed:'Failed',draft:'Drafts'};
+async function pgDash(q){
+ const f=q.f||'all';
+ let sel='select=*,generation_jobs(step,status)&order=created_at.desc';
+ if(f!=='all')sel+='&status=eq.'+f;
+ const rows=await R.get('projects?'+sel).catch(e=>{throw e});
+ const counts={};
+ for(const r of await R.get('projects?select=status').catch(()=>[]))counts[r.status]=(counts[r.status]||0)+1;
+ const cards=[
+  ['＋','Create New Video','Start a new AI video project','gold',"location.hash='#/create'"],
+  ['🎬','My Projects',(counts.draft||0)+(counts.processing||0)+(counts.completed||0)+(counts.failed||0)+' total','',"location.hash='#/dashboard?f=all'"],
+  ['⚙️','Processing',(counts.processing||0)+' active','',"location.hash='#/dashboard?f=processing'"],
+  ['✅','Completed',(counts.completed||0)+' done','',"location.hash='#/dashboard?f=completed'"],
+  ['⚠️','Failed',(counts.failed||0)+' need retry','',"location.hash='#/dashboard?f=failed'"],
+  ['📺','YouTube Channel','Manage channel',"location.hash='#/channel'"],
+  ['📊','Analytics','Views & growth',"location.hash='#/analytics'"]
+ ];
+ let h=`<div class="hero"><h1>AI YouTube <b>Studio</b></h1><p>Topic do — research, script, scenes, voice, visuals, captions, thumbnail, SEO aur upload tak ka deterministic pipeline yahin manage hota hai.</p></div>
+ <div class="cards">`+cards.map(c=>`<div class="card ${c[3]}" onclick="${c[4]}"><div class="ic">${c[0]}</div><div class="t">${c[1]}</div><div class="s">${c[2]}</div></div>`).join('')+`</div>
+ <div class="panel"><h2>${FILTERS[f]||'My Projects'}</h2><div class="ph-sub">${rows.length} project(s)</div><div id="plist">`;
+ if(!rows.length)h+='<div class="empty">No projects yet. Hit <b>＋ Create New Video</b> to start.</div>';
+ h+='</div></div>';
+ app().innerHTML=h;
+ const pl=$('#plist');
+ for(const p of rows){
+  const done=(p.generation_jobs||[]).filter(j=>j.status==='completed').length;
+  const pct=Math.round(done/9*100);
+  const el=document.createElement('div');el.className='proj';
+  el.innerHTML=`<div class="thumb">${esc((p.topic||'?').trim()[0].toUpperCase())}</div>
+  <div class="pmain"><div class="ptitle">${esc(p.topic)}</div>
+  <div class="pmeta">${stBadge(p.status)}<span>${p.video_type==='short'?'Short':'Long'} · ${fmtDur(p.duration_secs)}</span><span>${fmtDate(p.created_at)}</span><span>${pct}%</span></div>
+  <div class="pbar"><i style="width:${pct}%"></i></div></div>
+  <div class="pact">
+   <button class="btn sm" data-a="edit">Edit</button>
+   <button class="btn sm" data-a="prev">Preview</button>
+   ${p.status==='failed'?'<button class="btn sm" data-a="retry">Retry</button>':''}
+   <button class="btn sm danger" data-a="del">Delete</button>
+  </div>`;
+  el.querySelector('[data-a=edit]').onclick=()=>location.hash='#/project/'+p.id;
+  el.querySelector('[data-a=prev]').onclick=()=>previewProject(p.id);
+  const rt=el.querySelector('[data-a=retry]');if(rt)rt.onclick=()=>retryProject(p.id);
+  el.querySelector('[data-a=del]').onclick=async()=>{if(confirm('Delete "'+p.topic+'"? All scenes, jobs and drafts go too.')){await R.del('projects?id=eq.'+p.id);toast('Deleted');nav();}};
+  pl.appendChild(el);
+ }
+}
+async function jobMap(pid){
+ const jobs=await R.get('generation_jobs?select=step,status,detail,error,attempts&project_id=eq.'+pid);
+ const m={};jobs.forEach(j=>m[j.step]=j);return m;
+}
+async function refreshProgress(pid){
+ const m=await jobMap(pid);
+ const done=STEPS.filter(s=>m[s[0]]&&m[s[0]].status==='completed').length;
+ const pct=Math.round(done/STEPS.length*100);
+ const anyFail=STEPS.some(s=>m[s[0]]&&m[s[0]].status==='failed');
+ const anyProc=STEPS.some(s=>m[s[0]]&&['processing','retrying'].includes(m[s[0]].status));
+ await R.patch('projects?id=eq.'+pid,{progress:pct,status:anyFail?'failed':(done===STEPS.length?'completed':(anyProc||done>0?'processing':'draft')),updated_at:new Date().toISOString()});
+ return pct;
+}
+async function retryProject(pid){
+ const jobs=await R.get('generation_jobs?select=id&project_id=eq.'+pid+'&status=eq.failed');
+ for(const j of jobs)await R.patch('generation_jobs?id=eq.'+j.id,{status:'queued',attempts:j.attempts+1,error:null,updated_at:new Date().toISOString()});
+ await refreshProgress(pid);toast(jobs.length?jobs.length+' job(s) re-queued':'Nothing failed to retry');nav();
+}
+window.retryProject=retryProject;
+async function previewProject(pid){
+ const p=(await R.get('projects?select=*&id=eq.'+pid))[0];if(!p)return;
+ const m=await jobMap(pid);
+ const sc=await R.get('scenes?select=scene_id,start_secs,end_secs&project_id=eq.'+pid+'&order=scene_id');
+ const scr=await R.get('scripts?select=content&project_id=eq.'+pid+'&order=created_at.desc&limit=1');
+ const up=await R.get('youtube_uploads?select=title,status,visibility&project_id=eq.'+pid+'&order=created_at.desc&limit=1');
+ openModal(`<h2 style="margin-bottom:6px">${esc(p.topic)}</h2>
+ <div class="pmeta" style="margin-bottom:12px">${stBadge(p.status)}<span>${p.language} · ${p.visual_style}</span><span>${p.video_type==='short'?'Short':'Long'} · ${fmtDur(p.duration_secs)}</span></div>
+ <div class="kv" style="font-size:13.5px"><b style="color:var(--gold2)">Pipeline:</b> ${STEPS.map(s=>{const j=m[s[0]];return (j&&j.status==='completed'?'✅':j&&j.status==='failed'?'❌':'⬜')+' '+s[1]}).join(' · ')}</div>
+ <div class="kv" style="font-size:13.5px"><b style="color:var(--gold2)">Scenes:</b> ${sc.length} locked · timeline ${sc.length?fmtDur(sc[sc.length-1].end_secs):'0:00'}</div>
+ ${scr[0]?'<div class="kv" style="font-size:13.5px"><b style="color:var(--gold2)">Script:</b> '+esc(scr[0].content.slice(0,220))+'…</div>':'<div class="kv" style="font-size:13.5px;color:var(--dim)">No script yet.</div>'}
+ ${up[0]?'<div class="kv" style="font-size:13.5px"><b style="color:var(--gold2)">Upload draft:</b> '+esc(up[0].title)+' ('+up[0].status+', '+up[0].visibility+')</div>':''}
+ <div style="margin-top:14px;display:flex;gap:8px"><button class="btn primary" onclick="closeModal();location.hash=\'#/project/'+p.id+'\'">Open project</button><button class="btn" onclick="closeModal()">Close</button></div>`);
+}
+window.previewProject=previewProject;
+/* ============ create video ============ */
+function pgCreate(){
+ app().innerHTML=`<div class="panel" style="max-width:720px"><h2>🎬 Create New Video</h2><div class="ph-sub">Topic do — pipeline jobs automatically queue ho jayenge.</div>
+ <div class="field"><label>Topic *</label><input class="inp" id="cTopic" maxlength="200" placeholder="e.g. Aloo ke 5 surprising facts"></div>
+ <div class="grid2">
+  <div class="field"><label>Language</label><select class="inp" id="cLang"><option>Hindi</option><option>English</option><option>Hinglish</option></select></div>
+  <div class="field"><label>Video type</label><select class="inp" id="cType"><option value="short">YouTube Shorts</option><option value="long">YouTube Long Video</option></select></div>
+  <div class="field"><label>Duration (seconds)</label><input class="inp" id="cDur" type="number" min="5" max="7200" value="60"></div>
+  <div class="field"><label>Visual style</label><select class="inp" id="cStyle"><option>3D Cartoon</option><option>Realistic</option><option>Cinematic</option><option>Documentary</option><option>Animated Facts</option></select></div>
+  <div class="field"><label>Voice gender</label><select class="inp" id="cVG"><option value="female">Female</option><option value="male">Male</option></select></div>
+  <div class="field"><label>Voice language</label><select class="inp" id="cVL"><option>Hindi</option><option>English</option></select></div>
+  <div class="field"><label>Target audience</label><select class="inp" id="cAud"><option>Kids & Family</option><option>Teens</option><option>Adults</option><option>General</option></select></div>
+  <div class="field"><label>Platform</label><select class="inp" id="cPlat"><option>YouTube</option></select></div>
+ </div>
+ <button class="btn primary" id="cGo" style="width:100%;padding:13px">⚡ Generate Video</button>
+ <div class="note"><b>Honest note:</b> Generate dabane par project + 9 pipeline jobs (queued) bante hain. AI steps (research, script, visuals, voice, render, thumbnail, upload) Phase 2 me API keys judne par chalenge — tab tak <b>scene builder, validation, captions aur SEO</b> abhi use karo.</div>
+ </div>`;
+ $('#cType').onchange=e=>{$('#cDur').value=e.target.value==='short'?60:1200;};
+ $('#cGo').onclick=async()=>{
+  const topic=$('#cTopic').value.trim();
+  if(!topic){toast('Topic likho pehle');return;}
+  const u=_user;$('#cGo').disabled=true;
+  try{
+   const p=(await R.post('projects',{user_id:u.id,topic:topic,language:$('#cLang').value,video_type:$('#cType').value,duration_secs:parseInt($('#cDur').value)||60,visual_style:$('#cStyle').value,voice_gender:$('#cVG').value,voice_language:$('#cVL').value,target_audience:$('#cAud').value,platform:$('#cPlat').value,status:'processing'}))[0];
+   for(const s of STEPS)await R.post('generation_jobs',{project_id:p.id,step:s[0],status:'queued',detail:'Awaiting '+(AI_WAIT.has(s[0])?'AI service (Phase 2)':'input')});
+   await R.post('render_jobs',{project_id:p.id,status:'queued'});
+   toast('Project created — 9 jobs queued');location.hash='#/project/'+p.id;
+  }catch(e){toast('Failed: '+e.message);$('#cGo').disabled=false;}
+ };
+}
+/* ============ project detail ============ */
+async function pgProject(pid){
+ if(!pid){location.hash='#/dashboard';return;}
+ const pr=await R.get('projects?select=*&id=eq.'+pid);
+ if(!pr.length){app().innerHTML='<div class="empty">Project not found.</div>';return;}
+ const p=pr[0];
+ const m=await jobMap(pid);
+ const done=STEPS.filter(s=>m[s[0]]&&m[s[0]].status==='completed').length;
+ const pct=Math.round(done/STEPS.length*100);
+ let h=`<div class="panel"><div style="display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap">
+  <div style="flex:1;min-width:200px"><h2>${esc(p.topic)}</h2>
+  <div class="pmeta">${stBadge(p.status)}<span>${p.language} · ${p.visual_style}</span><span>${p.video_type==='short'?'Short':'Long'} · target ${fmtDur(p.duration_secs)}</span><span>${p.voice_gender} voice (${p.voice_language})</span><span>${esc(p.target_audience)}</span></div></div>
+  <button class="btn sm danger" id="pDel">Delete</button></div>
+  <div class="pbar" style="margin-top:12px"><i style="width:${pct}%"></i></div>
+  <div class="ph-sub" style="margin-top:6px">${done}/${STEPS.length} steps complete · ${pct}%</div></div>
+ <div class="panel"><h2>⚙️ Deterministic Pipeline</h2><div class="ph-sub">Research → Script → Scene → Visual → Voice → Caption → Render → Thumbnail → Upload. Failed step retry karo — pura workflow restart nahi hota.</div><div class="steps">`;
+ for(const s of STEPS){
+  const j=m[s[0]];
+  const st=j?j.status:'missing';
+  h+=`<div class="step s-${st}"><span class="dot"></span><div class="row"><div class="grow"><div class="sn">${s[1]}</div>
+  <div class="sd">${j?(esc(j.detail||'')+(j.error?' · <span style="color:#ff8f8f">'+esc(j.error)+'</span>':'')):'job row missing'}</div></div>
+  ${stBadge(st)}
+  ${st==='failed'?`<button class="btn sm" onclick="retryJob('${pid}','${s[0]}')">Retry</button>`:''}
+  ${AI_WAIT.has(s[0])&&st==='queued'?'<span class="sd">Awaiting AI service — Phase 2</span>':''}
+  </div></div>`;
+ }
+ h+=`</div><div class="note"><b>Phase 1 reality:</b> <b>Scene Plan</b> (validate below), <b>Script</b> (manual entry below), <b>Captions</b> (generator below) abhi kaam karte hain. Research, Visuals, Voice, Render, Thumbnail, Upload ko Phase 2 me API keys chahiye — ye kabhi fake "completed" nahi dikhayenge.</div></div>`;
+ h+=`<div id="secScript"></div><div id="secScenes"></div><div id="secSEO"></div><div id="secCaps"></div><div id="secUpload"></div>`;
+ app().innerHTML=h;
+ $('#pDel').onclick=async()=>{if(confirm('Delete "'+p.topic+'"?')){await R.del('projects?id=eq.'+pid);toast('Deleted');location.hash='#/dashboard';}};
+ renderScriptSec(p);renderScenesSec(p,m);renderSEOSec(p);renderCapsSec(p,m);renderUploadSec(p,m);
+}
+async function retryJob(pid,step){
+ const j=(await R.get('generation_jobs?select=id,attempts&project_id=eq.'+pid+'&step=eq.'+step))[0];if(!j)return;
+ await R.patch('generation_jobs?id=eq.'+j.id,{status:'queued',attempts:(j.attempts||0)+1,error:null,detail:'Re-queued by user',updated_at:new Date().toISOString()});
+ await refreshProgress(pid);toast(step+' re-queued');nav();
+}
+window.retryJob=retryJob;
+async function setJob(pid,step,status,detail){
+ const j=(await R.get('generation_jobs?select=id&project_id=eq.'+pid+'&step=eq.'+step))[0];if(!j)return;
+ await R.patch('generation_jobs?id=eq.'+j.id,{status:status,detail:detail||null,updated_at:new Date().toISOString()});
+ await refreshProgress(pid);
+}
+/* ============ script section (manual entry = honest Phase-1 path) ============ */
+async function renderScriptSec(p){
+ const el=$('#secScript');if(!el)return;
+ const rows=await R.get('scripts?select=*&project_id=eq.'+p.id+'&order=created_at.desc&limit=1');
+ const cur=rows[0];
+ const words=cur?cur.content.trim().split(/\s+/).filter(Boolean).length:0;
+ el.innerHTML=`<div class="panel"><h2>📝 Script</h2><div class="ph-sub">AI script Phase 2 me aayega. Abhi script manually likho/paste karo — word count aur duration estimate real hai.</div>
+ ${cur?`<div class="kv" style="font-size:13px;color:var(--mut)">${words} words · ~${fmtDur(words/140*60)} at 140 wpm</div>
+ <pre class="code" style="max-height:220px;overflow:auto;margin:10px 0">${esc(cur.content)}</pre>`:'<div class="empty" style="padding:16px">No script yet.</div>'}
+ <textarea class="inp" id="scTxt" placeholder="Script yahan likho ya paste karo...">${cur?esc(cur.content):''}</textarea>
+ <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+  <button class="btn primary sm" id="scSave">Save script</button>
+  <button class="btn sm" id="scAI">✨ Generate with AI</button>
+  <span class="sd" id="scEst" style="align-self:center;color:var(--dim);font-size:12.5px"></span>
+ </div></div>`;
+ const upd=()=>{const w=$('#scTxt').value.trim().split(/\s+/).filter(Boolean).length;$('#scEst').textContent=w?('≈ '+fmtDur(w/140*60)+' at 140 wpm'):'';};
+ $('#scTxt').oninput=upd;upd();
+ $('#scAI').onclick=()=>toast('AI script generation needs an LLM API key — Phase 2. Manual entry works now.');
+ $('#scSave').onclick=async()=>{
+  const t=$('#scTxt').value.trim();if(!t){toast('Script empty hai');return;}
+  const w=t.split(/\s+/).filter(Boolean).length;
+  if(cur)await R.patch('scripts?id=eq.'+cur.id,{content:t,word_count:w});
+  else await R.post('scripts',{project_id:p.id,content:t,word_count:w});
+  await setJob(p.id,'script','completed','Manual script saved ('+w+' words)');
+  toast('Script saved');nav();
+ };
+}
+/* ============ scenes: timeline + REAL validation ============ */
+function validateScenes(scenes,project){
+ const errs=[],warns=[];
+ if(!scenes.length)errs.push('No scenes yet — add scenes first.');
+ const ids=scenes.map(s=>s.scene_id).slice().sort((a,b)=>a-b);
+ const dup=ids.filter((v,i)=>ids.indexOf(v)!==i);
+ if(dup.length)errs.push('Duplicate scene_id(s): '+[...new Set(dup)].join(', '));
+ ids.forEach((id,i)=>{if(id!==i+1)errs.push('Scene IDs must run 1,2,3… in order (position '+(i+1)+' has ID '+id+').');});
+ const sorted=scenes.slice().sort((a,b)=>a.scene_id-b.scene_id);
+ sorted.forEach((s,i)=>{
+  const n='Scene '+s.scene_id+': ';
+  if(!(s.end_secs>s.start_secs))errs.push(n+'end must be after start.');
+  if(s.start_secs<0)errs.push(n+'start cannot be negative.');
+  if(!String(s.narration||'').trim())errs.push(n+'missing narration (voice). [scene-lock]');
+  if(!String(s.visual||'').trim())errs.push(n+'missing visual. [scene-lock]');
+  if(!String(s.caption||'').trim())errs.push(n+'missing caption. [scene-lock]');
+  if(i===0&&Math.abs(s.start_secs)>0.01)errs.push('Timeline must start at 0s (scene 1 starts at '+s.start_secs+'s).');
+  if(i>0){const pv=sorted[i-1],gap=s.start_secs-pv.end_secs;
+   if(gap<-0.01)errs.push('Scene '+s.scene_id+' overlaps scene '+pv.scene_id+'.');
+   else if(gap>0.01)errs.push('Gap of '+gap.toFixed(2)+'s between scene '+pv.scene_id+' and '+s.scene_id+'.');}
+ });
+ const total=sorted.length?Number(sorted[sorted.length-1].end_secs):0;
+ if(sorted.length&&project&&Math.abs(total-project.duration_secs)/project.duration_secs>0.05)
+  warns.push('Timeline total '+total.toFixed(1)+'s differs from target '+project.duration_secs+'s by >5%.');
+ return{ok:!errs.length,errs:errs,warns:warns,total:total};
+}
+async function renderScenesSec(p,m){
+ const el=$('#secScenes');if(!el)return;
+ let scenes=await R.get('scenes?select=*&project_id=eq.'+p.id+'&order=scene_id').catch(()=>[]);
+ let h=`<div class="panel"><h2>🎞️ Scene-Lock Timeline</h2><div class="ph-sub">Har scene ek independent object: voice + visual + caption + duration ek hi timeline ID se linked. Renderer isi ko source of truth manega.</div><div id="vRes"></div><div id="scList">`;
+ for(const s of scenes){
+  h+=`<div class="scene" data-id="${s.id}"><div class="sh"><span class="sid">Scene ${s.scene_id}</span><span class="stm">${Number(s.start_secs).toFixed(1)}s → ${Number(s.end_secs).toFixed(1)}s (${(Number(s.end_secs)-Number(s.start_secs)).toFixed(1)}s)</span>
+  <span style="flex:1"></span><button class="btn sm" data-e="1">Edit</button><button class="btn sm danger" data-d="1">✕</button></div>
+  <div class="kv"><b>Voice</b> ${esc(s.narration)||'<span style="color:#ff8f8f">missing</span>'}</div>
+  <div class="kv"><b>Visual</b> ${esc(s.visual)||'<span style="color:#ff8f8f">missing</span>'}</div>
+  <div class="kv"><b>Caption</b> ${esc(s.caption)||'<span style="color:#ff8f8f">missing</span>'}</div>
+  ${s.sfx?'<div class="kv"><b>SFX</b> '+esc(s.sfx)+'</div>':''}${s.transition?'<div class="kv"><b>Trans.</b> '+esc(s.transition)+'</div>':''}${s.camera?'<div class="kv"><b>Camera</b> '+esc(s.camera)+'</div>':''}
+  <div class="sform" style="display:none;margin-top:10px">
+   <div class="grid2"><div class="field"><label>Start (s)</label><input class="inp" data-f="start_secs" type="number" step="0.1" min="0" value="${s.start_secs}"></div>
+   <div class="field"><label>End (s)</label><input class="inp" data-f="end_secs" type="number" step="0.1" min="0" value="${s.end_secs}"></div></div>
+   <div class="field"><label>Narration / Voice</label><textarea class="inp" data-f="narration">${esc(s.narration)}</textarea></div>
+   <div class="field"><label>Visual description</label><textarea class="inp" data-f="visual">${esc(s.visual)}</textarea></div>
+   <div class="field"><label>Caption</label><input class="inp" data-f="caption" value="${esc(s.caption)}"></div>
+   <div class="grid2"><div class="field"><label>SFX</label><input class="inp" data-f="sfx" value="${esc(s.sfx)}"></div>
+   <div class="field"><label>Transition</label><input class="inp" data-f="transition" value="${esc(s.transition)}"></div></div>
+   <div class="field"><label>Camera</label><input class="inp" data-f="camera" value="${esc(s.camera)}"></div>
+   <button class="btn primary sm" data-s="1">Save scene</button>
+  </div></div>`;
+ }
+ h+=`</div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
+ <button class="btn sm" id="scAdd">＋ Add scene</button>
+ <button class="btn sm primary" id="scValidate">✓ Validate scenes</button></div>
+ <div id="scAddF" style="display:none;margin-top:12px" class="scene"><div class="grid2">
+ <div class="field"><label>Start (s)</label><input class="inp" id="naS" type="number" step="0.1" min="0"></div>
+ <div class="field"><label>End (s)</label><input class="inp" id="naE" type="number" step="0.1" min="0"></div></div>
+ <div class="field"><label>Narration / Voice *</label><textarea class="inp" id="naN"></textarea></div>
+ <div class="field"><label>Visual description *</label><textarea class="inp" id="naV"></textarea></div>
+ <div class="field"><label>Caption *</label><input class="inp" id="naC"></div>
+ <div class="grid2"><div class="field"><label>SFX</label><input class="inp" id="naX"></div>
+ <div class="field"><label>Camera</label><input class="inp" id="naCam"></div></div>
+ <button class="btn primary sm" id="naGo">Add scene</button></div></div>`;
+ el.innerHTML=h;
+ el.querySelectorAll('.scene[data-id]').forEach(card=>{
+  const id=card.dataset.id;
+  card.querySelector('[data-e]').onclick=()=>{const f=card.querySelector('.sform');f.style.display=f.style.display==='none'?'block':'none';};
+  card.querySelector('[data-d]').onclick=async()=>{if(confirm('Delete scene?')){await R.del('scenes?id=eq.'+id);toast('Scene deleted');nav();}};
+  card.querySelector('[data-s]').onclick=async()=>{
+   const b={};card.querySelectorAll('[data-f]').forEach(i=>b[i.dataset.f]=i.value);
+   b.start_secs=parseFloat(b.start_secs)||0;b.end_secs=parseFloat(b.end_secs)||0;b.updated_at=new Date().toISOString();
+   try{await R.patch('scenes?id=eq.'+id,b);toast('Scene saved');nav();}catch(e){toast('Save failed: '+e.message);}
+  };
+ });
+ const nextId=scenes.length?Math.max.apply(null,scenes.map(s=>s.scene_id))+1:1;
+ const lastEnd=scenes.length?Math.max.apply(null,scenes.map(s=>Number(s.end_secs))):0;
+ $('#scAdd').onclick=()=>{const f=$('#scAddF');f.style.display=f.style.display==='none'?'block':'none';$('#naS').value=lastEnd.toFixed(1);$('#naE').value=(lastEnd+5).toFixed(1);};
+ $('#naGo').onclick=async()=>{
+  const n=$('#naN').value.trim(),v=$('#naV').value.trim(),c=$('#naC').value.trim();
+  if(!n||!v||!c){toast('Narration, visual aur caption required hain (scene-lock)');return;}
+  try{await R.post('scenes',{project_id:p.id,scene_id:nextId,start_secs:parseFloat($('#naS').value)||0,end_secs:parseFloat($('#naE').value)||5,narration:n,visual:v,caption:c,sfx:$('#naX').value.trim(),camera:$('#naCam').value.trim()});toast('Scene '+nextId+' added');nav();}
+  catch(e){toast('Add failed: '+e.message);}
+ };
+ $('#scValidate').onclick=async()=>{
+  scenes=await R.get('scenes?select=*&project_id=eq.'+p.id+'&order=scene_id').catch(()=>[]);
+  const r=validateScenes(scenes,p);
+  let rh='';
+  if(r.ok)rh=`<div class="vres ok"><b>✅ All checks passed</b> — ${scenes.length} scenes locked, timeline ${r.total.toFixed(1)}s, no gaps/overlaps, scene-lock intact.${r.warns.length?'<ul>'+r.warns.map(w=>'<li>⚠️ '+esc(w)+'</li>').join('')+'</ul>':''}</div>`;
+  else rh=`<div class="vres no"><b>❌ Validation failed (${r.errs.length})</b><ul>`+r.errs.map(e=>'<li>'+esc(e)+'</li>').join('')+`</ul>${r.warns.length?'<ul>'+r.warns.map(w=>'<li>⚠️ '+esc(w)+'</li>').join('')+'</ul>':''}</div>`;
+  $('#vRes').innerHTML=rh;
+  await setJob(p.id,'scene',r.ok?'completed':'failed',r.ok?('Validated: '+scenes.length+' scenes, '+r.total.toFixed(1)+'s timeline'):('Validation failed: '+r.errs.length+' issue(s)'));
+  if(r.ok)toast('Scenes validated & locked');
+  $('#vRes').scrollIntoView({block:'nearest'});
+ };
+}
+/* ============ SEO generator (real template logic) ============ */
+function genSEO(topic,lang,scenes){
+ const t=topic.trim();
+ const words=t.split(/\s+/).filter(w=>w.length>1);
+ const kwCap=words.map(w=>w[0].toUpperCase()+w.slice(1)).join('');
+ const titles=[
+  t+' 😱 | Hindi Kahani',
+  t+' — 5 Surprising Facts 🤯',
+  'Kya Aap Jante Hain? '+t+' 🤔',
+  t+' | Best Hindi Cartoon Story',
+  '😲 '+t+' Ne Sabko Hairan Kar Diya!'
+ ];
+ const chaps=(scenes||[]).slice(0,8).map(s=>'• '+fmtDur(s.start_secs)+' — '+String(s.caption||('Scene '+s.scene_id))).join('\n');
+ const desc=t+' — ek majedar aur seekh bhari Hindi cartoon kahani.\n\nIs video me aap dekhenge:\n'+(chaps||'• '+t)+'\n\nAisi aur kahaniyon ke liye subscribe karein! 🔔\n\n#HindiKahani #Cartoon';
+ const baseTags=words.map(w=>w.toLowerCase()).concat(['hindi kahani','cartoon video','moral story','kids video','3d cartoon','hindi story','cartoon kahani']);
+ const tags=[...new Set(baseTags)].filter(Boolean).slice(0,12);
+ const clean=words.filter(w=>w.length>2).slice(0,4).map(w=>w.replace(/[^a-zA-Z0-9\u0900-\u097F]/g,'')).filter(Boolean);
+ const hashtags=['#HindiKahani','#Cartoon','#MoralStory','#KidsVideo'].concat(clean.map(w=>'#'+w)).filter((v,i,a)=>a.indexOf(v)===i).slice(0,8);
+ return{titles:titles,description:desc,tags:tags,hashtags:hashtags};
+}
+async function renderSEOSec(p){
+ const el=$('#secSEO');if(!el)return;
+ const scenes=await R.get('scenes?select=scene_id,start_secs,caption&project_id=eq.'+p.id+'&order=scene_id').catch(()=>[]);
+ const drafts=await R.get('youtube_uploads?select=*&project_id=eq.'+p.id+'&order=created_at.desc&limit=1').catch(()=>[]);
+ const d=drafts[0];
+ el.innerHTML=`<div class="panel"><h2>🔍 YouTube SEO</h2><div class="ph-sub">Real generator — topic + keywords se 5 titles, description, tags, hashtags.</div>
+ <div id="seoOut">${d?`<div class="note"><b>Saved draft:</b> ${esc(d.title)} <span style="color:var(--dim)">(${d.status}, ${d.visibility})</span></div>`:''}</div>
+ <button class="btn primary sm" id="seoGo">⚡ Generate SEO</button></div>`;
+ $('#seoGo').onclick=()=>{
+  const s=genSEO(p.topic,p.language,scenes);
+  $('#seoOut').innerHTML=`
+  <h3>Title options (pick one)</h3>${s.titles.map((t,i)=>`<div class="copyrow"><pre class="code" id="st${i}">${esc(t)}</pre><button class="btn sm" onclick="copyTxt('st${i}')">Copy</button></div>`).join('')}
+  <h3>Description</h3><div class="copyrow"><pre class="code" id="sdesc">${esc(s.description)}</pre><button class="btn sm" onclick="copyTxt('sdesc')">Copy</button></div>
+  <h3>Tags</h3><div class="copyrow"><pre class="code" id="stags">${esc(s.tags.join(', '))}</pre><button class="btn sm" onclick="copyTxt('stags')">Copy</button></div>
+  <h3>Hashtags</h3><div class="copyrow"><pre class="code" id="shash">${esc(s.hashtags.join(' '))}</pre><button class="btn sm" onclick="copyTxt('shash')">Copy</button></div>
+  <div class="field" style="margin-top:10px"><label>Use this title for upload draft</label><select class="inp" id="seoPick">${s.titles.map(t=>'<option>'+esc(t)+'</option>').join('')}</select></div>
+  <button class="btn sm" id="seoSave">💾 Save as upload draft</button>`;
+  window._seo=s;
+  $('#seoSave').onclick=async()=>{
+   const s2=window._seo;if(!s2)return;
+   const title=$('#seoPick').value;
+   if(d)await R.patch('youtube_uploads?id=eq.'+d.id,{title:title,description:s2.description,tags:s2.tags,hashtags:s2.hashtags});
+   else await R.post('youtube_uploads',{project_id:p.id,title:title,description:s2.description,tags:s2.tags,hashtags:s2.hashtags,visibility:'private',status:'draft'});
+   toast('Upload draft saved');nav();
+  };
+ };
+}
+/* ============ captions helper (real timing logic) ============ */
+function splitLen(text,max){
+ const words=String(text||'').split(/\s+/).filter(Boolean),out=[];let cur='';
+ for(const w of words){if((cur+' '+w).trim().length>max){if(cur)out.push(cur.trim());cur=w;}else cur+=' '+w;}
+ if(cur.trim())out.push(cur.trim());return out.length?out:[text||'…'];
+}
+function cuesFromScenes(scenes){
+ const cues=[];
+ for(const s of scenes){
+  const chunks=splitLen(s.narration,42);
+  const dur=(Number(s.end_secs)-Number(s.start_secs))/chunks.length;
+  chunks.forEach((c,i)=>cues.push({start:Number(s.start_secs)+i*dur,end:Number(s.start_secs)+(i+1)*dur,text:c}));
+ }
+ return cues;
+}
+function toSRT(cues){
+ const f=s=>{const ms=Math.round(s*1000);const p=n=>String(n).padStart(2,'0');return p(Math.floor(ms/3600000))+':'+p(Math.floor(ms/60000)%60)+':'+p(Math.floor(ms/1000)%60)+','+String(ms%1000).padStart(3,'0');};
+ return cues.map((c,i)=>(i+1)+'\n'+f(c.start)+' --> '+f(c.end)+'\n'+c.text+'\n').join('\n');
+}
+async function renderCapsSec(p,m){
+ const el=$('#secCaps');if(!el)return;
+ const n=(await R.get('captions?select=id&project_id=eq.'+p.id).catch(()=>[])).length;
+ el.innerHTML=`<div class="panel"><h2>💬 Captions</h2><div class="ph-sub">Scenes se real timing cues — max 42 chars/line, narration se synced. ${n?n+' cue(s) saved.':''}</div>
+ <div id="capOut"></div>
+ <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn primary sm" id="capGo">⚡ Generate captions</button><button class="btn sm" id="capDl" style="display:none">⬇ Download .srt</button></div></div>`;
+ let lastSRT='';
+ $('#capGo').onclick=async()=>{
+  const scenes=await R.get('scenes?select=*&project_id=eq.'+p.id+'&order=scene_id');
+  if(!scenes.length){toast('Pehle scenes banao');return;}
+  const cues=cuesFromScenes(scenes);
+  lastSRT=toSRT(cues);
+  $('#capOut').innerHTML='<h3>'+cues.length+' cues</h3><pre class="code" style="max-height:200px;overflow:auto">'+esc(lastSRT.slice(0,1500))+(lastSRT.length>1500?'\n…':'')+'</pre>';
+  $('#capDl').style.display='';
+  await R.del('captions?project_id=eq.'+p.id);
+  for(const c of cues)await R.post('captions',{project_id:p.id,text:c.text,start_secs:+c.start.toFixed(2),end_secs:+c.end.toFixed(2)});
+  await setJob(p.id,'caption','completed',cues.length+' cues generated from scenes');
+  toast(cues.length+' captions saved');
+ };
+ $('#capDl').onclick=()=>{if(lastSRT)dl('captions-'+p.id.slice(0,8)+'.srt',lastSRT);};
+}
+/* ============ upload section (honest Phase-2 gating) ============ */
+async function renderUploadSec(p,m){
+ const el=$('#secUpload');if(!el)return;
+ const ups=await R.get('youtube_uploads?select=*&project_id=eq.'+p.id+'&order=created_at.desc').catch(()=>[]);
+ const chs=await R.get('youtube_channels?select=id,channel_name&user_id=eq.'+_user.id).catch(()=>[]);
+ let h=`<div class="panel"><h2>📤 YouTube Upload</h2><div class="ph-sub">Draft yahin banta hai. Asli upload ke liye YouTube OAuth Phase 2 me judega — password kabhi nahi manga jayega.</div>`;
+ if(!ups.length)h+='<div class="empty" style="padding:14px">No upload draft — SEO section se "Save as upload draft" karo.</div>';
+ for(const u of ups){
+  h+=`<div class="scene"><div class="sh"><span class="sid">${esc(u.title)||'(untitled)'}</span><span style="flex:1"></span>${stBadge(u.status)}<span class="badge b-draft">${esc(u.visibility)}</span></div>
+  <div class="kv" style="font-size:12.5px;color:var(--dim)">Tags: ${esc((u.tags||[]).join(', '))}</div>
+  <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+   <select class="inp" id="upCh-${u.id}" style="max-width:220px"><option value="">— channel —</option>${chs.map(c=>'<option value="'+c.id+'"'+(u.channel_id===c.id?' selected':'')+'>'+esc(c.channel_name)+'</option>').join('')}</select>
+   <select class="inp" id="upV-${u.id}" style="max-width:160px">${['private','unlisted','public','scheduled'].map(v=>'<option'+(u.visibility===v?' selected':'')+'>'+v+'</option>').join('')}</select>
+   <button class="btn sm" data-save="${u.id}">Save</button>
+   <button class="btn sm primary" data-up="${u.id}">⬆ Upload to YouTube</button>
+  </div></div>`;
+ }
+ h+='<div class="note"><b>Phase 2:</b> YouTube OAuth connect + video file upload + thumbnail upload + schedule. Abhi draft save karna real hai; upload button imandari se batayega ki OAuth pending hai.</div></div>';
+ el.innerHTML=h;
+ el.querySelectorAll('[data-save]').forEach(b=>b.onclick=async()=>{
+  const id=b.dataset.save;
+  await R.patch('youtube_uploads?id=eq.'+id,{channel_id:$('#upCh-'+id).value||null,visibility:$('#upV-'+id).value});
+  toast('Draft updated');
+ });
+ el.querySelectorAll('[data-up]').forEach(b=>b.onclick=async()=>{
+  const id=b.dataset.up;
+  await R.patch('youtube_uploads?id=eq.'+id,{status:'queued'});
+  await setJob(p.id,'upload','failed','YouTube OAuth not connected (Phase 2)');
+  await R.patch('youtube_uploads?id=eq.'+id,{status:'failed',error:'YouTube OAuth not connected (Phase 2)'});
+  toast('Upload needs YouTube OAuth — Phase 2');nav();
+ });
+}
+/* ============ channel page ============ */
+async function pgChannel(){
+ const chs=await R.get('youtube_channels?select=*&user_id=eq.'+_user.id+'&order=created_at.desc').catch(()=>[]);
+ let h=`<div class="panel" style="max-width:720px"><h2>📺 YouTube Channel</h2><div class="ph-sub">Apne channels yahan save karo. Google OAuth login Phase 2 me aayega.</div>`;
+ if(!chs.length)h+='<div class="empty">No channel saved yet.</div>';
+ for(const c of chs)h+=`<div class="proj"><div class="thumb">▶</div><div class="pmain"><div class="ptitle">${esc(c.channel_name)}</div><div class="pmeta"><span>${esc(c.channel_handle||'')}</span>${c.connected?'<span class="badge b-completed">connected</span>':'<span class="badge b-draft">not connected</span>'}</div></div><div class="pact"><button class="btn sm danger" onclick="delChannel('${c.id}')">Delete</button></div></div>`;
+ h+=`<h3>Add channel</h3><div class="grid2"><div class="field"><label>Channel name *</label><input class="inp" id="chN" placeholder="My Channel"></div>
+ <div class="field"><label>Handle</label><input class="inp" id="chH" placeholder="@mychannel"></div></div>
+ <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn primary sm" id="chAdd">Save channel</button><button class="btn sm" id="chOAuth">🔗 Connect with Google (OAuth)</button></div>
+ <div class="note"><b>OAuth:</b> asli Google sign-in Phase 2 me — API keys aur server consent chahiye. Abhi channel manually save karna real hai.</div></div>`;
+ app().innerHTML=h;
+ $('#chAdd').onclick=async()=>{const n=$('#chN').value.trim();if(!n){toast('Channel name likho');return;}
+  await R.post('youtube_channels',{user_id:_user.id,channel_name:n,channel_handle:$('#chH').value.trim()});toast('Channel saved');nav();};
+ $('#chOAuth').onclick=()=>toast('YouTube OAuth Phase 2 me aayega — abhi manual entry use karo.');
+}
+window.delChannel=async id=>{if(confirm('Delete channel?')){await R.del('youtube_channels?id=eq.'+id);toast('Deleted');nav();}};
+/* ============ analytics page ============ */
+async function pgAnalytics(){
+ const rows=await R.get('analytics?select=*,projects(topic)&user_id=eq.'+_user.id+'&order=recorded_at.desc&limit=50').catch(()=>[]);
+ let h=`<div class="panel"><h2>📊 Analytics</h2><div class="ph-sub">Metrics yahan aayenge jab Phase 2 me uploads + YouTube data judenge.</div>`;
+ if(!rows.length)h+='<div class="empty">No analytics data yet — ye section uploads live hote hi bharega.</div>';
+ else h+='<table class="tbl"><tr><th>Metric</th><th>Value</th><th>Project</th><th>Recorded</th></tr>'+rows.map(r=>'<tr><td>'+esc(r.metric)+'</td><td>'+esc(r.value)+'</td><td>'+esc((r.projects||{}).topic||'—')+'</td><td>'+fmtDate(r.recorded_at)+'</td></tr>').join('')+'</table>';
+ app().innerHTML=h+'</div>';
+}
+/* ============ init ============ */
+nav();
+</script>
+</body>
+</html>
+
