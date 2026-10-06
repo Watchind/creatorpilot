@@ -260,10 +260,18 @@ function gMsg(st,d,what){
 async function gCall(model,body,what){
  const k=gkey();
  if(!k){const e=new Error('NO_KEY');e.noKey=true;throw e;}
+ const waits=[8000,20000,45000];let att=0;
+ while(true){
  const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+encodeURIComponent(model)+':generateContent?key='+encodeURIComponent(k),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
  const d=await r.json().catch(()=>({}));
+ if(r.status===429&&att<waits.length){
+  let w=waits[att++];try{const ra=r.headers.get('retry-after');const n=parseInt(ra,10);if(n>0&&n<=120)w=n*1000;}catch(e){}
+  let cp=0;try{cp=parseInt(($('#gpPct')||{}).textContent)||0;}catch(e){}
+  for(let t=Math.ceil(w/1000);t>0;t--){try{gpSet(cp,(what||'Gemini'),'⏳ Quota full — '+t+'s me auto-retry...');}catch(e){}await sleep(1000);}
+  continue;}
  if(!r.ok){const e=new Error(gMsg(r.status,d,what));e.status=r.status;throw e;}
  return d;
+ }
 }
 async function gCallAuto(kind,body,what){const cur=kind==='text'?gmodel():kind==='img'?gimgmodel():gttsmodel();const lk=kind==='text'?LS.gm:kind==='img'?LS.gi:LS.gt;const cands=[];[cur].concat(FALLBACKS[kind]).forEach(function(m){if(cands.indexOf(m)<0)cands.push(m);});let last=null;for(const m of cands){try{const d=await gCall(m,body,what);if(m!==cur){try{localStorage.setItem(lk,m);}catch(e){}}return d;}catch(e){if(e&&e.status===404){last=e;continue;}throw e;}}throw last;}
 function gParts(d){try{return (((d.candidates||[])[0]||{}).content||{}).parts||[];}catch(e){return[];}}
