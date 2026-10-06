@@ -675,9 +675,9 @@ async function pgAnalytics(){
    ================================================================ */
 const LS={gk:'cp_gemini_key',gm:'cp_gemini_model',gi:'cp_gemini_img_model',gt:'cp_gemini_tts_model',oc:'cp_oauth_client'};
 const gkey=()=> (localStorage.getItem(LS.gk)||'').trim();
-const gmodel=()=> (localStorage.getItem(LS.gm)||'').trim()||'gemini-2.0-flash';
-const gimgmodel=()=> (localStorage.getItem(LS.gi)||'').trim()||'gemini-2.0-flash-preview-image-generation';
-const gttsmodel=()=> (localStorage.getItem(LS.gt)||'').trim()||'gemini-2.5-flash-preview-tts';
+const gmodel=()=> (localStorage.getItem(LS.gm)||'').trim()||'gemini-3-flash-preview';
+const gimgmodel=()=> (localStorage.getItem(LS.gi)||'').trim()||'gemini-3.1-flash-image';
+const gttsmodel=()=> (localStorage.getItem(LS.gt)||'').trim()||'gemini-3.1-flash-tts-preview';
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 /* per-step run hints for the stepper (accurate per step) */
 const NEEDS_RUN=new Set(['research','visual','voice','render','thumbnail','upload']);
@@ -1152,9 +1152,9 @@ function pgSettings(){
  </div>`;
  $('#sSave').onclick=()=>{
   localStorage.setItem(LS.gk,$('#sKey').value.trim());
-  localStorage.setItem(LS.gm,$('#sM').value.trim()||'gemini-2.0-flash');
-  localStorage.setItem(LS.gi,$('#sI').value.trim()||'gemini-2.0-flash-preview-image-generation');
-  localStorage.setItem(LS.gt,$('#sT').value.trim()||'gemini-2.5-flash-preview-tts');
+  localStorage.setItem(LS.gm,$('#sM').value.trim()||'gemini-3-flash-preview');
+  localStorage.setItem(LS.gi,$('#sI').value.trim()||'gemini-3.1-flash-image');
+  localStorage.setItem(LS.gt,$('#sT').value.trim()||'gemini-3.1-flash-tts-preview');
   toast('Saved — key sirf is browser me hai');
  };
  $('#sTest').onclick=async()=>{
