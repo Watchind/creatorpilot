@@ -2,104 +2,148 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>CreatorPilot AI — Prompt se Video</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>CreatorPilot — Prompt se Video</title>
 <style>
-:root{--bg:#0a0a0d;--bg2:#101016;--card:#14141b;--card2:#1a1a22;--line:#26262f;--gold:#d4af37;--gold2:#f5d76e;--gold-dim:#8a7326;--txt:#f5f3ea;--mut:#a7a7b3;--dim:#6d6d78;--ok:#3ecf6e;--bad:#ff5d5d;--r:16px}
+:root{--bg:#000;--card:#1c1c1e;--card2:#2c2c2e;--card3:#3a3a3c;--line:#2e2e32;--txt:#fff;--mut:#a1a1a6;--dim:#6e6e73;--ok:#3ecf6e;--bad:#ff5d5d;--purple:#a259ff}
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,Arial,sans-serif;font-size:15px;line-height:1.6;-webkit-tap-highlight-color:transparent;min-height:100vh;background-image:radial-gradient(900px 480px at 50% -120px,rgba(212,175,55,.10),transparent 70%)}
-a{color:var(--gold2);text-decoration:none}
-.wrap{max-width:1080px;margin:0 auto;padding:0 16px}
-.hdr{position:sticky;top:0;z-index:50;background:rgba(10,10,13,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
-.hdr-in{max-width:1080px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;gap:10px}
-.logo{display:flex;align-items:center;gap:9px;font-weight:800;font-size:17px}
-.logo .mk{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,var(--gold2),var(--gold) 60%,#9c7a1e);display:flex;align-items:center;justify-content:center;color:#141414;font-weight:900;font-size:17px;flex:none}
-.logo b{background:linear-gradient(90deg,var(--gold2),var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent;white-space:nowrap}
-.nav{display:flex;gap:4px;flex:1;overflow-x:auto;margin-left:6px}
-.nav a{color:var(--mut);padding:9px 13px;border-radius:10px;font-size:14px;white-space:nowrap;font-weight:600}
-.nav a.on,.nav a:hover{color:var(--gold2);background:#1c1a12}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;border:1px solid var(--line);background:var(--card2);color:var(--txt);padding:10px 16px;border-radius:11px;font-size:14px;font-weight:600;cursor:pointer;transition:.15s;min-height:44px}
-.btn:hover{border-color:var(--gold-dim)}
-.btn.sm{padding:7px 12px;font-size:13px;min-height:40px}
-.btn:disabled{opacity:.5;cursor:not-allowed}
-.hero-big{text-align:center;padding:54px 20px 26px;animation:fadeUp .5s ease}
-.hero-big h1{font-size:clamp(36px,9vw,66px);font-weight:900;letter-spacing:-1px;line-height:1.12}
-.hero-big h1 .g{background:linear-gradient(90deg,var(--gold2),var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent}
-.hero-big p{color:var(--mut);font-size:16px;max-width:540px;margin:14px auto 0}
-@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
-.feats{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:24px 0 30px}
-.feat{background:rgba(20,20,27,.72);border:1px solid var(--line);border-radius:14px;padding:14px 16px;font-size:13.5px;color:var(--mut);width:210px;backdrop-filter:blur(6px);animation:fadeUp .5s ease}
-.feat b{color:var(--txt);display:block;margin-bottom:3px;font-size:14px}
-.gbtn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;max-width:380px;margin:6px auto;padding:15px;border-radius:14px;border:1px solid #d8d8d8;background:#fff;color:#1a1a1a;font-size:16px;font-weight:700;cursor:pointer;min-height:56px;transition:.15s}
-.gbtn:hover{box-shadow:0 6px 24px rgba(255,255,255,.18)}
-.gbtn:disabled{opacity:.6;cursor:not-allowed}
-.g-ic{width:22px;height:22px;flex:none}
-.errline{color:#ff8f8f;font-size:13.5px;margin:12px auto 0;max-width:380px;text-align:center;min-height:20px}
-.studio{max-width:720px;margin:0 auto;animation:fadeUp .4s ease}
-.panel{background:rgba(20,20,27,.78);border:1px solid var(--line);border-radius:20px;padding:22px;margin:16px 0;backdrop-filter:blur(8px)}
-.panel h2{font-size:19px;margin-bottom:2px}
-.ph-sub{font-size:13px;color:var(--dim);margin-bottom:6px}
-textarea.prompt{width:100%;min-height:124px;background:#0e0e13;border:1px solid var(--line);border-radius:14px;color:var(--txt);padding:14px;font-size:15.5px;font-family:inherit;resize:vertical;margin-top:10px}
-textarea.prompt:focus{outline:none;border-color:var(--gold)}
-.opt-label{font-size:12px;color:var(--mut);font-weight:700;letter-spacing:.5px;margin:18px 0 8px;text-transform:uppercase}
-.seg{display:flex;background:#0e0e13;border:1px solid var(--line);border-radius:13px;padding:4px;gap:4px}
-.seg button{flex:1;border:none;background:transparent;color:var(--mut);padding:11px 6px;border-radius:10px;font-size:13.5px;font-weight:700;cursor:pointer;transition:.15s;min-height:48px}
-.seg button.on{background:linear-gradient(135deg,var(--gold2),var(--gold));color:#191904;box-shadow:0 4px 14px rgba(212,175,55,.3)}
-.up-prevs{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
-.up-prevs img{width:76px;height:76px;object-fit:cover;border-radius:10px;border:1px solid var(--gold-dim)}
-.filebtn{display:inline-flex;align-items:center;gap:8px;margin-top:10px}
-.btn-go{width:100%;padding:16px;border:none;border-radius:15px;font-size:17px;font-weight:800;cursor:pointer;background:linear-gradient(135deg,var(--gold2),var(--gold));color:#191904;box-shadow:0 8px 28px rgba(212,175,55,.25);transition:.15s;min-height:58px;margin-top:22px}
-.btn-go:active{transform:scale(.98)}
-.btn-go:disabled{opacity:.65;cursor:wait}
-.generating{animation:pulse 1.6s infinite}
-@keyframes pulse{0%,100%{box-shadow:0 8px 28px rgba(212,175,55,.25)}50%{box-shadow:0 8px 44px rgba(212,175,55,.55)}}
-.stages{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:16px 0 6px}
-.st{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 6px;text-align:center;font-size:12px;color:var(--dim);font-weight:700;transition:.2s}
-.st .ic{font-size:21px;display:block;margin-bottom:4px}
-.st.on{border-color:var(--gold);color:var(--gold2);box-shadow:0 0 0 1px var(--gold-dim)}
-.st.done{border-color:#1d5c36;color:var(--ok)}
-.st.fail{border-color:#5c2323;color:#ff8f8f}
-.pbar{height:10px;background:#0c0c10;border:1px solid var(--line);border-radius:6px;margin:12px 0 6px;overflow:hidden}
-.pbar i{display:block;height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));border-radius:6px;transition:width .3s}
-.pmeta{font-size:13px;color:var(--mut);display:flex;justify-content:space-between;align-items:center}
-.pmsg{font-size:13.5px;color:var(--mut);margin-top:8px;min-height:22px}
-.pmsg.err{color:#ff8f8f}
-.vres{border-radius:12px;padding:13px 15px;margin:12px 0;font-size:13.5px}
-.vres.no{background:#2e1414;border:1px solid #5c2323;color:#f3c1c1}
-video.out{width:100%;border-radius:14px;border:1px solid var(--line);background:#000;margin-top:6px;max-height:60vh}
-.resbtns{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
-.resbtns .btn,.resbtns a.btn{flex:1;min-width:150px}
-.note{background:#141310;border:1px dashed var(--gold-dim);border-radius:11px;padding:12px 14px;font-size:13px;color:var(--mut);margin:12px 0}
-.note b{color:var(--gold2)}
-.badge{display:inline-block;font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;letter-spacing:.3px}
-.b-draft{background:#23232c;color:var(--mut)}.b-processing{background:#3a2c10;color:var(--gold2)}.b-completed{background:#12351f;color:var(--ok)}.b-failed{background:#3d1717;color:#ff8f8f}
-.proj{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:11px}
-.proj .t{font-weight:700;font-size:14.5px}
-.proj .m{font-size:12.5px;color:var(--dim);margin-top:4px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-.empty{text-align:center;color:var(--dim);padding:40px 16px;font-size:14px}
-.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;animation:fadeUp .2s ease}
-.modal{background:var(--bg2);border:1px solid var(--line);border-radius:18px;max-width:480px;width:100%;max-height:88vh;overflow:auto;padding:22px}
-.modal h2{margin-bottom:4px}
-.field{margin-bottom:14px}
-.field label{display:block;font-size:12.5px;color:var(--mut);margin-bottom:6px;font-weight:600}
-.inp{width:100%;background:#0e0e13;border:1px solid var(--line);color:var(--txt);border-radius:11px;padding:12px 13px;font-size:14.5px;font-family:inherit}
-.inp:focus{outline:none;border-color:var(--gold)}
-.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:26px;background:#1e1e26;border:1px solid var(--gold-dim);color:var(--txt);padding:11px 18px;border-radius:12px;font-size:13.5px;z-index:200;box-shadow:0 8px 30px rgba(0,0,0,.5);max-width:92vw;text-align:center}
-.about{margin:46px auto 0;max-width:720px;text-align:center;padding:28px 18px 46px;border-top:1px solid var(--line);color:var(--dim);font-size:13px}
-.about h3{color:var(--gold2);font-size:14px;margin-bottom:6px;letter-spacing:.4px}
-.about p{margin:9px 0;line-height:1.65}
-.about .row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:12px}
-@media(max-width:560px){.panel{padding:18px 15px}.hero-big{padding:40px 14px 20px}.stages{gap:6px}.st{font-size:11px;padding:8px 4px}}
+body{background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,Arial,sans-serif;font-size:15px;line-height:1.55;-webkit-tap-highlight-color:transparent;min-height:100vh}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit}
+.wrap{max-width:760px;margin:0 auto;padding:0 16px 150px}
+/* ---------- home ---------- */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:22px 0 6px}
+.topbar h1{font-size:29px;font-weight:600;letter-spacing:-.5px}
+.avatar{width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,#b06cff,#7c3aed);color:#fff;font-weight:700;font-size:20px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex:none}
+.sec-head{display:flex;align-items:center;justify-content:space-between;margin:26px 0 8px}
+.sec-head h2{font-size:25px;font-weight:500}
+.pill-new{background:var(--card);color:var(--txt);border:none;border-radius:999px;padding:13px 24px;font-size:16px;font-weight:500;cursor:pointer}
+.pill-new:active{background:var(--card2)}
+.prow{display:flex;align-items:center;gap:15px;padding:12px 0;cursor:pointer}
+.pth{width:112px;height:112px;border-radius:22px;object-fit:cover;background:var(--card);flex:none;display:flex;align-items:center;justify-content:center;font-size:34px;color:var(--dim)}
+.pmeta{flex:1;min-width:0}
+.ptitle{font-size:17px;font-weight:500;margin-bottom:7px}
+.pcounts{display:flex;gap:16px;color:var(--dim);font-size:14px}
+.pdots{background:none;border:none;color:var(--dim);font-size:22px;cursor:pointer;padding:8px;letter-spacing:2px}
+.menu-pop{position:fixed;z-index:200;background:var(--card2);border-radius:16px;padding:6px;min-width:170px;box-shadow:0 12px 40px rgba(0,0,0,.6)}
+.menu-pop button{display:block;width:100%;text-align:left;background:none;border:none;color:var(--txt);padding:13px 16px;font-size:15px;border-radius:10px;cursor:pointer}
+.menu-pop button:active{background:var(--card3)}
+.menu-pop button.danger{color:var(--bad)}
+/* ---------- project header ---------- */
+.ph{display:flex;align-items:center;gap:12px;padding:14px 0}
+.backbtn{width:50px;height:50px;border-radius:16px;background:var(--card);border:none;color:var(--txt);font-size:22px;cursor:pointer;flex:none}
+.ph h2{font-size:20px;font-weight:500;flex:1}
+.ph .icbtn{width:50px;height:50px;border-radius:16px;background:var(--card);border:none;color:var(--txt);font-size:20px;cursor:pointer;flex:none}
+/* ---------- empty state ---------- */
+.empty{padding:70px 20px 30px;text-align:center;color:var(--dim)}
+.empty .t1{font-size:16px;margin-bottom:6px}
+.empty .t2{font-size:15px;margin-bottom:26px}
+.upload-pill{background:var(--card);border:none;color:var(--txt);border-radius:999px;padding:14px 30px;font-size:16px;cursor:pointer;display:inline-flex;align-items:center;gap:9px}
+/* ---------- assets grid ---------- */
+.agrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:8px 0 20px}
+.acard{background:var(--card);border-radius:20px;overflow:hidden}
+.acard img,.acard video{width:100%;aspect-ratio:9/16;object-fit:cover;display:block;background:#000}
+.acard .am{display:flex;align-items:center;justify-content:space-between;padding:10px 12px}
+.acard .am span{font-size:12.5px;color:var(--mut)}
+.dl{background:var(--card2);border:none;color:var(--txt);border-radius:999px;padding:8px 16px;font-size:13px;cursor:pointer}
+.sess-note{text-align:center;color:var(--dim);font-size:12.5px;padding:4px 16px 18px}
+/* ---------- prompt bar ---------- */
+.pbar-wrap{position:fixed;left:0;right:0;bottom:0;z-index:100;padding:8px 14px calc(12px + env(safe-area-inset-bottom));background:linear-gradient(transparent,#000 35%);pointer-events:none}
+.pbar{pointer-events:auto;max-width:760px;margin:0 auto;background:var(--card);border-radius:30px;padding:18px 16px 13px;box-shadow:0 -6px 30px rgba(0,0,0,.5)}
+.pbar textarea{width:100%;background:none;border:none;outline:none;color:var(--txt);font-size:21px;font-family:inherit;resize:none;min-height:34px;max-height:130px}
+.pbar textarea::placeholder{color:var(--mut)}
+.pbar-row{display:flex;align-items:center;gap:10px;margin-top:12px}
+.plusbtn{width:44px;height:44px;border-radius:50%;background:none;border:none;color:var(--txt);font-size:30px;font-weight:300;cursor:pointer;line-height:1}
+.modechip{background:var(--card2);border:1px solid var(--card3);color:var(--txt);border-radius:999px;padding:11px 18px;font-size:15px;cursor:pointer;margin-left:auto}
+.sendbtn{width:52px;height:52px;border-radius:50%;background:var(--card2);border:none;color:var(--txt);font-size:22px;cursor:pointer;flex:none}
+.sendbtn.ready{background:#fff;color:#000}
+/* ---------- progress ---------- */
+.gprog{max-width:760px;margin:0 auto 10px;background:var(--card);border-radius:20px;padding:14px 16px;display:none;pointer-events:auto}
+.gprog.show{display:block}
+.gp-top{display:flex;justify-content:space-between;font-size:13.5px;color:var(--mut);margin-bottom:8px}
+.gp-bar{height:6px;background:var(--card2);border-radius:99px;overflow:hidden}
+.gp-bar i{display:block;height:100%;width:0;background:#fff;border-radius:99px;transition:width .3s}
+.gp-msg{font-size:13px;color:var(--mut);margin-top:8px}
+.gp-msg.err{color:var(--bad)}
+/* ---------- bottom sheet ---------- */
+.sheet-bg{position:fixed;inset:0;z-index:150;background:rgba(0,0,0,.65);display:none}
+.sheet-bg.show{display:block}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:151;background:var(--card);border-radius:26px 26px 0 0;padding:14px 18px calc(20px + env(safe-area-inset-bottom));max-width:760px;margin:0 auto;transform:translateY(105%);transition:transform .28s ease;max-height:82vh;overflow-y:auto}
+.sheet-bg.show+.sheet{transform:none}
+.grab{width:44px;height:5px;border-radius:99px;background:var(--card3);margin:2px auto 12px}
+.sheet-top{text-align:center;color:var(--mut);font-size:13.5px;margin-bottom:14px}
+.tabs{display:flex;background:#101012;border-radius:18px;padding:5px;margin-bottom:6px}
+.tabs button{flex:1;background:none;border:none;color:var(--mut);border-radius:13px;padding:13px;font-size:16px;font-weight:500;cursor:pointer}
+.tabs button.on{background:var(--card3);color:var(--txt)}
+.optlbl{color:var(--mut);font-size:13px;margin:14px 2px 8px}
+.ratios{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;background:#101012;border-radius:18px;padding:10px 6px}
+.ratio{background:none;border:none;color:var(--mut);cursor:pointer;border-radius:14px;padding:10px 4px;display:flex;flex-direction:column;align-items:center;gap:7px;font-size:13px}
+.ratio.on{background:var(--card3);color:var(--txt)}
+.ar-ic{border:2px solid currentColor;border-radius:3px;display:block}
+.counts{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;background:#101012;border-radius:18px;padding:6px}
+.counts button{background:none;border:none;color:var(--mut);border-radius:13px;padding:14px;font-size:16px;cursor:pointer}
+.counts button.on{background:var(--card3);color:var(--txt)}
+.seg2{display:flex;gap:6px;background:#101012;border-radius:18px;padding:6px}
+.seg2 button{flex:1;background:none;border:none;color:var(--mut);border-radius:13px;padding:13px;font-size:15px;cursor:pointer}
+.seg2 button.on{background:var(--card3);color:var(--txt)}
+.modelrow{width:100%;margin-top:14px;background:#101012;border:none;color:var(--txt);border-radius:18px;padding:16px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}
+/* ---------- account ---------- */
+.acct-card{background:var(--card);border-radius:22px;padding:20px;margin:14px 0;display:flex;align-items:center;gap:15px}
+.acct-card .avatar{width:58px;height:58px;font-size:24px}
+.acct-name{font-size:18px;font-weight:600}
+.acct-mail{color:var(--mut);font-size:14px;margin-top:2px;word-break:break-all}
+.freebadge{display:inline-block;background:var(--card3);color:var(--txt);border-radius:8px;padding:3px 12px;font-size:12.5px;font-weight:600;margin-top:8px;letter-spacing:.5px}
+.rows-card{background:var(--card);border-radius:22px;margin:14px 0;overflow:hidden}
+.arow{width:100%;display:flex;align-items:center;gap:14px;background:none;border:none;color:var(--txt);padding:19px 20px;font-size:16px;cursor:pointer;text-align:left}
+.arow+.arow{border-top:1px solid var(--line)}
+.arow .ri{font-size:20px;width:28px;text-align:center;flex:none}
+.arow.danger{color:var(--bad)}
+.arow .tx{flex:1}
+.arow .sub{display:block;font-size:12.5px;color:var(--dim);margin-top:2px}
+/* ---------- login ---------- */
+.login-wrap{max-width:420px;margin:0 auto;padding:90px 24px 40px;text-align:center}
+.login-wrap h1{font-size:44px;font-weight:700;letter-spacing:-1px;margin-bottom:10px}
+.login-wrap .tag{color:var(--mut);font-size:19px;margin-bottom:44px}
+.gbtn{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;background:#fff;color:#1f1f1f;border:none;border-radius:999px;padding:16px;font-size:17px;font-weight:600;cursor:pointer}
+.gbtn:disabled{opacity:.6}
+.g-ic{width:22px;height:22px}
+.errline{color:var(--bad);font-size:13.5px;margin-top:14px;min-height:20px}
+/* ---------- modal / toast ---------- */
+#modal:empty{display:none}
+.modal-bg{position:fixed;inset:0;z-index:180;background:rgba(0,0,0,.7);display:flex;align-items:flex-end;justify-content:center}
+.modal{background:var(--card);border-radius:24px 24px 0 0;padding:22px 20px calc(24px + env(safe-area-inset-bottom));width:100%;max-width:560px;max-height:86vh;overflow-y:auto}
+.modal h2{font-size:20px;margin-bottom:8px}
+.field{margin:14px 0}
+.field label{display:block;font-size:13px;color:var(--mut);margin-bottom:7px}
+.inp{width:100%;background:#101012;border:1px solid var(--line);border-radius:14px;color:var(--txt);padding:14px;font-size:15px;font-family:inherit;outline:none}
+.inp:focus{border-color:var(--dim)}
+.mrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.mbtn{background:var(--card2);border:none;color:var(--txt);border-radius:999px;padding:12px 20px;font-size:14.5px;cursor:pointer}
+.mbtn.primary{background:#fff;color:#000;font-weight:600}
+.mbtn.danger{color:var(--bad)}
+.note{font-size:13px;color:var(--mut);margin-top:14px;line-height:1.6}
+.note a{color:#fff;text-decoration:underline}
+.toast{position:fixed;left:50%;bottom:120px;transform:translateX(-50%);z-index:300;background:var(--card2);color:var(--txt);padding:13px 22px;border-radius:999px;font-size:14.5px;box-shadow:0 8px 30px rgba(0,0,0,.5);max-width:88vw;text-align:center}
+@media(min-width:700px){.modal-bg{align-items:center}.modal{border-radius:24px}.topbar h1{font-size:32px}}
 </style>
 </head>
 <body>
-<header class="hdr"><div class="hdr-in">
-<div class="logo"><span class="mk">C</span><b>CreatorPilot&nbsp;AI</b></div>
-<nav class="nav" id="nav"></nav>
-<span id="hact" style="display:flex;gap:8px;align-items:center"></span>
-</div></header>
-<div class="wrap"><div id="app"></div></div>
+<div id="app"></div>
+<div class="pbar-wrap" id="pbarWrap" style="display:none">
+  <div class="gprog" id="gprog"><div class="gp-top"><span id="gpStage">Starting…</span><span id="gpPct">0%</span></div><div class="gp-bar"><i id="gpBar"></i></div><div class="gp-msg" id="gpMsg"></div></div>
+  <div class="pbar">
+    <textarea id="pInput" rows="1" placeholder="What do you want to make?"></textarea>
+    <div class="pbar-row">
+      <button class="plusbtn" id="plusBtn" aria-label="options">+</button>
+      <button class="modechip" id="modeChip">🎬 ▾ x1</button>
+      <button class="sendbtn" id="sendBtn" aria-label="send">→</button>
+    </div>
+  </div>
+</div>
+<div class="sheet-bg" id="sheetBg"></div>
+<div class="sheet" id="sheet"></div>
 <div id="modal"></div>
+<input type="file" id="upFile" accept="image/*" multiple style="display:none">
 <script>
 'use strict';
 /* ============ config ============ */
@@ -154,44 +198,17 @@ async function ensureProfile(u){
 }
 /* ============ ui helpers ============ */
 const $=s=>document.querySelector(s);
+const app=()=>document.getElementById('app');
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function toast(m,ms){const t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),ms||2800);}
-function fmtDur(s){s=Math.round(s||0);return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');}
-function fmtDate(d){try{return new Date(d).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})}catch(e){return ''}}
-function stBadge(s){return '<span class="badge b-'+s+'">'+s+'</span>'}
+function fmtDT(d){try{let s=new Date(d).toLocaleString('en-US',{month:'short',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:true});return s.replace('AM','am').replace('PM','pm');}catch(e){return''}}
 function openModal(html){$('#modal').innerHTML='<div class="modal-bg" onclick="if(event.target===this)closeModal()"><div class="modal">'+html+'</div></div>';}
 function closeModal(){$('#modal').innerHTML='';}
 window.closeModal=closeModal;
-const aboutHtml=`<footer class="about"><h3>ABOUT US</h3>
-<p><b style="color:var(--gold2)">CreatorPilot AI</b> ek free AI video studio hai — prompt likho, AI script likhta hai, voice banata hai, visuals banata hai aur poori video seedha tumhare browser me render hoti hai.</p>
-<p>🤖 <b>AI transparency:</b> yahan banti sabhi videos AI se generate hoti hain (Google Gemini). Tumhari API key sirf tumhare browser me rehti hai — kahin upload nahi hoti.</p>
-<p style="margin-top:10px">© 2026 CreatorPilot AI Studio · Prompt se video tak.</p></footer>`;
-/* ============ router ============ */
-const app=()=>document.getElementById('app');
-function setNav(route){
- const u=_user;
- $('#nav').innerHTML=u?`<a href="#/studio" class="${route==='studio'?'on':''}">🎬 Studio</a><a href="#/videos" class="${route==='videos'?'on':''}">📁 My Videos</a>`:'';
- $('#hact').innerHTML=u?`<button class="btn sm" onclick="openKeyModal()">🔑 API Key</button><button class="btn sm" onclick="doLogout()">Logout</button>`:'';
-}
-window.doLogout=async()=>{const s=ses.get();if(s)await authReq('/logout',{method:'POST',headers:{apikey:SB_KEY,Authorization:'Bearer '+s.access_token}}).catch(()=>{});ses.set(null);_user=null;location.hash='#/login';};
-function parseHash(){const h=(location.hash||'#/login').replace(/^#\/?/,'');const qi=h.indexOf('?');return{path:qi<0?h:h.slice(0,qi)};}
-async function nav(){
- const{path}=parseHash();const page=(path.split('/')[0]||'login');
- if(page==='login'){const u=await me();if(u){location.hash='#/studio';return;}}
- else{const u=await me();if(!u){location.hash='#/login';return;}await ensureProfile(u);}
- setNav(page);
- try{
-  if(page==='login')pgLogin();
-  else if(page==='studio')pgStudio();
-  else if(page==='videos')await pgVideos();
-  else location.hash='#/studio';
- }catch(e){app().innerHTML='<div class="vres no"><b>Error:</b> '+esc(e.message)+'</div>'+aboutHtml;}
- window.scrollTo(0,0);
-}
-window.addEventListener('hashchange',nav);
+function userName(){const u=_user||{};const m=u.user_metadata||{};return m.full_name||m.name||(u.email||'U').split('@')[0];}
 /* ============ auth: Google only ============ */
 async function googleLogin(){
- const b=$('#gBtn'),e=$('#gErr');if(!b)return;b.disabled=true;e.textContent='';
+ const b=$('#gBtn'),e=$('#gErr');if(b)b.disabled=true;if(e)e.textContent='';
  const ru=location.origin+location.pathname;
  const url=SB_URL+'/auth/v1/authorize?provider=google&redirect_to='+encodeURIComponent(ru);
  try{
@@ -202,12 +219,13 @@ async function googleLogin(){
   }
   location.href=url;
  }catch(err){
-  b.disabled=false;
+  if(b)b.disabled=false;
   const m=String(err.message||err);
-  e.textContent=(/provider|disabled|unsupported|not enabled/i.test(m))?'Google sign-in abhi setup ho raha hai — thodi der me try karo.':('Login fail: '+m);
+  if(e)e.textContent=(/provider|disabled|unsupported|not enabled/i.test(m))?'Google sign-in abhi setup ho raha hai — thodi der me try karo.':('Login fail: '+m);
  }
 }
 window.googleLogin=googleLogin;
+window.doLogout=async()=>{const s=ses.get();if(s)await authReq('/logout',{method:'POST',headers:{apikey:SB_KEY,Authorization:'Bearer '+s.access_token}}).catch(()=>{});ses.set(null);_user=null;location.hash='#/login';};
 function handleAuthReturn(){
  try{
   const h=location.hash||'';
@@ -215,7 +233,7 @@ function handleAuthReturn(){
   const ps=Object.fromEntries(new URLSearchParams(h.charAt(0)==='#'?h.slice(1):h));
   if(ps.access_token&&ps.refresh_token){
    ses.set({access_token:ps.access_token,refresh_token:ps.refresh_token,expires_at:parseInt(ps.expires_at||'0',10),token_type:ps.token_type||'bearer'});
-   history.replaceState(null,'',location.pathname+location.search+'#/studio');
+   history.replaceState(null,'',location.pathname+location.search+'#/');
    setTimeout(()=>toast('Welcome! 👋'),350);
   }
  }catch(e){}
@@ -229,9 +247,9 @@ const gttsmodel=()=> (localStorage.getItem(LS.gt)||'').trim()||'gemini-3.1-flash
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 function gMsg(st,d,what){
  const m=(d&&(d.error&&d.error.message))||'';
- if(st===400)return 'API key galat hai ya model available nahi. 🔑 API Key me key check karo.'+(m?' ('+m.slice(0,120)+')':'');
+ if(st===400)return 'API key galat hai ya model available nahi. 🔑 API key check karo.'+(m?' ('+m.slice(0,120)+')':'');
  if(st===401||st===403)return 'Key reject hui (401/403) — ya to key galat hai, ya us par restriction hai, ya Gemini API enable nahi hai.'+(m?' ('+m.slice(0,120)+')':'');
- if(st===404)return 'Model nahi mila (404) — Google ne model ka naam badla ho sakta hai.';
+ if(st===404)return 'Model nahi mila (404) — Google ne model ka naam badla ho sakta hai. 🔑 API key settings me model naam check karo.';
  if(st===429)return 'Gemini free-tier quota / rate-limit khatam (429). Ye normal hai — kuch der baad Retry dabao, paise nahi lagenge.';
  if(st>=500)return 'Google server error ('+st+') — thodi der baad retry karo.';
  return (what||'Gemini')+' request fail ('+st+').'+(m?' '+m.slice(0,140):'');
@@ -300,203 +318,311 @@ function cuesFromScenes(scenes){
 function ttsText(nar){
  return String(nar||'').split('\n').map(l=>l.replace(/^[A-Z\u0900-\u0975][A-Z\u0900-\u0975\s.'’-]{1,24}:\s*/,'').trim()).filter(Boolean).join(' ');
 }
-/* ============ API key modal (same localStorage keys as before) ============ */
+/* ============ API key modal (+ editable model names) ============ */
+function modelDisplay(which){
+ const v=which==='text'?gmodel():which==='image'?gimgmodel():gttsmodel();
+ if(which==='text')return /flash-preview/.test(v)?'Gemini 3 Flash':v;
+ if(which==='image')return /flash-image/.test(v)?'🍌 Nano Banana 2':v;
+ return /tts/.test(v)?'Gemini TTS':v;
+}
 function openKeyModal(){
- const k=gkey();
- openModal(`<h2>🔑 Gemini API Key</h2><div class="ph-sub">Key sirf <b>is browser ke localStorage</b> me rehti hai — kahin upload nahi hoti. AI calls seedha Google ke API ko jaati hain.</div>
+ const k=gkey(),mt=localStorage.getItem(LS.gm)||'',mi=localStorage.getItem(LS.gi)||'',ms=localStorage.getItem(LS.gt)||'';
+ openModal(`<h2>🔑 Gemini API Key</h2><div class="note" style="margin-top:0">Key sirf <b style="color:#fff">is browser ke localStorage</b> me rehti hai — kahin upload nahi hoti. AI calls seedha Google ke API ko jaati hain.</div>
  <div class="field"><label>API key (free)</label><input class="inp" id="kKey" type="password" autocomplete="off" placeholder="AIza..." value="${esc(k)}"></div>
- <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn primary sm" id="kSave">💾 Save</button><button class="btn sm" id="kTest">🧪 Test key</button>${k?'<button class="btn sm" id="kDel" style="color:#ff8f8f">Remove</button>':''}<button class="btn sm" onclick="closeModal()">Close</button></div>
- <div class="note" style="margin-top:12px"><b>Free key kaise lein:</b><br>1. <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a> kholo → "Create API key".<br>2. Copy karke upar paste karo → Save → Test.<br><span style="color:var(--dim)">Image/voice par roz ki free limit hoti hai — 429 aaye to thodi der baad retry karo.</span></div>`);
- $('#kSave').onclick=()=>{const v=$('#kKey').value.trim();if(!v){toast('Key paste karo pehle');return;}localStorage.setItem(LS.gk,v);toast('✅ Key saved — sirf is browser me hai');closeModal();};
+ <div class="field"><label>Text model</label><input class="inp" id="kMt" placeholder="gemini-3-flash-preview" value="${esc(mt)}"></div>
+ <div class="field"><label>Image model</label><input class="inp" id="kMi" placeholder="gemini-3.1-flash-image" value="${esc(mi)}"></div>
+ <div class="field"><label>Voice (TTS) model</label><input class="inp" id="kMs" placeholder="gemini-3.1-flash-tts-preview" value="${esc(ms)}"></div>
+ <div class="mrow"><button class="mbtn primary" id="kSave">💾 Save</button><button class="mbtn" id="kTest">🧪 Test key</button>${k?'<button class="mbtn danger" id="kDel">Remove</button>':''}<button class="mbtn" onclick="closeModal()">Close</button></div>
+ <div class="note"><b style="color:#fff">Free key kaise lein:</b><br>1. <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a> kholo → "Create API key".<br>2. Copy karke upar paste karo → Save → Test.<br><span style="color:var(--dim)">Model naam khaali chhodo to default use hoga. Google naam badle to yahin naya naam daal do.</span></div>`);
+ $('#kSave').onclick=()=>{
+  const v=$('#kKey').value.trim();if(!v){toast('Key paste karo pehle');return;}
+  localStorage.setItem(LS.gk,v);
+  const a=$('#kMt').value.trim(),b=$('#kMi').value.trim(),c=$('#kMs').value.trim();
+  a?localStorage.setItem(LS.gm,a):localStorage.removeItem(LS.gm);
+  b?localStorage.setItem(LS.gi,b):localStorage.removeItem(LS.gi);
+  c?localStorage.setItem(LS.gt,c):localStorage.removeItem(LS.gt);
+  toast('✅ Saved — sirf is browser me hai');closeModal();
+ };
  $('#kTest').onclick=async()=>{const b=$('#kTest');b.disabled=true;try{const t=await gText('Reply with exactly: OK');toast(/^\s*OK/.test(t)?'✅ Key kaam kar rahi hai!':'⚠️ Jawab aaya lekin ajeeb: '+t.slice(0,60));}catch(e){toast('❌ '+(e.noKey?'Pehle key save karo':e.message));}b.disabled=false;};
  const kd=$('#kDel');if(kd)kd.onclick=()=>{localStorage.removeItem(LS.gk);toast('Key removed');closeModal();};
 }
 window.openKeyModal=openKeyModal;
-/* ============ page: login (Google only) ============ */
+function aboutModal(){
+ openModal(`<h2>ℹ️ About Us</h2>
+ <div class="note" style="font-size:14.5px;color:var(--mut)"><b style="color:#fff">CreatorPilot</b> ek free AI video studio hai — prompt likho, AI script likhta hai, voice banata hai, visuals banata hai, aur poori video seedha tumhare browser me render hoti hai.</div>
+ <div class="note" style="font-size:14.5px;color:var(--mut)">🤖 <b style="color:#fff">AI transparency:</b> yahan banti sabhi videos aur images AI se generate hoti hain (Google Gemini). Tumhari API key sirf tumhare browser me rehti hai.</div>
+ <div class="mrow"><button class="mbtn" onclick="closeModal()">Close</button></div>`);
+}
+window.aboutModal=aboutModal;
+/* ============ generation state ============ */
+const UI={mode:'video',ratio:'9:16',count:1,dur:30,voice:'female'};
+const RATIOS=['16:9','4:3','1:1','3:4','9:16'];
+const RDIMS={'16:9':[1280,720],'4:3':[960,720],'1:1':[960,960],'3:4':[720,960],'9:16':[720,1280]};
+const RHINT={'16:9':'16:9 widescreen composition','4:3':'4:3 composition','1:1':'square 1:1 composition','3:4':'vertical 3:4 portrait composition','9:16':'vertical 9:16 portrait composition'};
+const sessionAssets={}; // pid -> [{type:'image'|'video', url, img?}]
+let curPid=null, running=false;
+/* ============ router ============ */
+function parseHash(){return (location.hash||'#/').replace(/^#\/?/,'');}
+function showPbar(on){$('#pbarWrap').style.display=on?'block':'none';}
+async function nav(){
+ const h=parseHash();
+ if(h==='login'){const u=await me();if(u){location.hash='#/';return;}showPbar(false);pgLogin();return;}
+ const u=await me();if(!u){location.hash='#/login';return;}
+ await ensureProfile(u);
+ try{
+  if(h===''||h==='_'){showPbar(false);await pgHome();}
+  else if(h==='account'){showPbar(false);pgAccount();}
+  else if(h.indexOf('project/')===0){await pgProject(h.slice(8));}
+  else{location.hash='#/';}
+ }catch(e){app().innerHTML='<div class="wrap" style="padding-top:60px"><div class="rows-card"><div class="arow"><span class="tx"><b>Error</b><span class="sub">'+esc(e.message)+'</span></span></div></div></div>';showPbar(false);}
+ window.scrollTo(0,0);
+}
+window.addEventListener('hashchange',nav);
+/* ============ page: login ============ */
 function pgLogin(){
- setNav('login');
- app().innerHTML=`<div class="hero-big"><h1>Prompt likho.<br><span class="g">Video pao.</span></h1>
- <p>AI script likhta hai, voice banata hai, visuals banata hai — poori video seedha tumhare browser me render hoti hai.</p></div>
- <div class="feats">
-  <div class="feat"><b>✍️ Prompt → Script</b>Gemini scene-wise Hindi script likhta hai</div>
-  <div class="feat"><b>🎙️ Voice + Visuals</b>AI voiceover aur har scene ki image</div>
-  <div class="feat"><b>🎬 Render + Download</b>Browser me video banti hai — .webm download karo</div>
- </div>
+ app().innerHTML=`<div class="login-wrap"><h1>CreatorPilot</h1>
+ <div class="tag">What do you want to make?</div>
  <button class="gbtn" id="gBtn" onclick="googleLogin()"><svg class="g-ic" viewBox="0 0 24 24"><path fill="#4285F4" d="M23.5 12.3c0-.9-.1-1.5-.3-2.3H12v4.5h6.5c-.1 1.1-.8 2.7-2.4 3.8l-.1.1 3.5 2.7.1.1c2.2-2 3.9-5 3.9-8.9z"/><path fill="#34A853" d="M12 24c3.2 0 5.9-1.1 7.9-2.9l-3.8-2.9c-1 .7-2.4 1.2-4.1 1.2-3.1 0-5.8-2.1-6.8-5l-.1.1-3.7 2.9v.1C3.5 21.3 7.5 24 12 24z"/><path fill="#FBBC05" d="M5.2 14.4c-.2-.7-.4-1.5-.4-2.4s.1-1.7.4-2.4l-.1-.1-3.7-2.9-.1.1C.5 8.2 0 10 0 12s.5 3.8 1.3 5.3l3.9-2.9z"/><path fill="#EA4335" d="M12 4.7c1.8 0 3 .8 3.7 1.4l3.3-3.2C17.9 1.1 15.2 0 12 0 7.5 0 3.5 2.7 1.3 6.7l3.9 2.9c1-2.9 3.7-4.9 6.8-4.9z"/></svg>Continue with Google</button>
  <div class="errline" id="gErr"></div>
- <div style="text-align:center;color:var(--dim);font-size:12.5px;margin-top:14px">Free AI video studio · key tumhare browser me hi rehti hai</div>
- ${aboutHtml}`;
+ <div style="color:var(--dim);font-size:12.5px;margin-top:26px">Free AI video studio · key tumhare browser me hi rehti hai</div></div>`;
 }
-/* ============ page: studio ============ */
-const S={imgMode:'ai',ratio:'16:9',dur:60,voice:'female',uploads:[]};
-let J=null,running=false;
-const ST4=[['script','✍️','Script'],['voice','🎙️','Voice'],['visuals','🖼️','Visuals'],['render','🎬','Render']];
-const DIMS={'16:9':[1280,720],'9:16':[720,1280],'1:1':[960,960]};
-function segInit(id,cb){
- const el=document.getElementById(id);if(!el)return;
- el.querySelectorAll('button').forEach(b=>{b.onclick=()=>{el.querySelectorAll('button').forEach(x=>x.classList.remove('on'));b.classList.add('on');cb(b.dataset.v);};});
+/* ============ page: home ============ */
+function projRow(p){
+ const a=sessionAssets[p.id]||[];
+ const nv=a.filter(x=>x.type==='video').length, ni=a.filter(x=>x.type==='image').length;
+ const th=a.length?(a[0].type==='image'?`<img class="pth" src="${a[0].url}">`:`<video class="pth" src="${a[0].url}" muted playsinline></video>`):`<div class="pth">🎞️</div>`;
+ let counts='';
+ if(nv)counts+=`<span>🎬 ${nv}</span>`;
+ if(ni)counts+=`<span>🖼️ ${ni}</span>`;
+ return `<div class="prow" onclick="location.hash='#/project/${p.id}'">${th}<div class="pmeta"><div class="ptitle">${esc(fmtDT(p.created_at))}</div><div class="pcounts">${counts}</div></div><button class="pdots" onclick="event.stopPropagation();projMenu(event,'${p.id}')">⋮</button></div>`;
 }
-function pgStudio(){
- setNav('studio');
- app().innerHTML=`<div class="studio"><div class="panel">
- <h2>🎬 Nayi Video</h2><div class="ph-sub">Prompt likho, options chuno, ek button dabao.</div>
- <textarea class="prompt" id="pPrompt" maxlength="500" placeholder="Ek chhote gaon me ek udti patang ki kahani..."></textarea>
- <div class="opt-label">Image</div>
- <div class="seg" id="segImg"><button data-v="ai" class="on">✨ AI se banao</button><button data-v="upload">📤 Apni upload karo</button></div>
- <div id="upBox" style="display:none"><label class="btn sm filebtn" for="upFile">📤 Images chuno (max 3)</label><input type="file" id="upFile" accept="image/*" multiple style="display:none"><div class="up-prevs" id="upPrev"></div><div class="ph-sub" style="margin-top:6px">Scenes inhi images me cycle hongi.</div></div>
- <div class="opt-label">Ratio</div>
- <div class="seg" id="segRatio"><button data-v="16:9" class="on">16:9</button><button data-v="9:16">9:16</button><button data-v="1:1">1:1</button></div>
- <div class="opt-label">Duration</div>
- <div class="seg" id="segDur"><button data-v="15">15s</button><button data-v="30">30s</button><button data-v="60" class="on">60s</button></div>
- <div class="opt-label">Voice</div>
- <div class="seg" id="segVoice"><button data-v="female" class="on">👩 Female</button><button data-v="male">👨 Male</button></div>
- <button class="btn-go" id="goBtn">🎬 Video Banao</button>
- <div id="progBox" style="display:none">
-  <div class="stages" id="stg">${ST4.map(s=>`<div class="st" id="st-${s[0]}"><span class="ic">${s[1]}</span>${s[2]}</div>`).join('')}</div>
-  <div class="pbar"><i id="pbarI" style="width:0%"></i></div>
-  <div class="pmeta"><span id="ppct">0%</span><span id="pstg"></span></div>
-  <div class="pmsg" id="pmsg"></div>
- </div>
- <div id="resBox" style="display:none"></div>
- </div>${aboutHtml}</div>`;
- segInit('segImg',v=>{S.imgMode=v;$('#upBox').style.display=v==='upload'?'block':'none';});
- segInit('segRatio',v=>{S.ratio=v;});
- segInit('segDur',v=>{S.dur=parseInt(v,10);});
- segInit('segVoice',v=>{S.voice=v;});
- $('#upFile').onchange=async e=>{await handleUploads(e.target.files);};
- $('#goBtn').onclick=makeVideo;
+async function pgHome(){
+ const u=_user;
+ const rows=await R.get('projects?select=id,topic,created_at&order=created_at.desc&limit=50').catch(()=>[]);
+ let h=`<div class="wrap"><div class="topbar"><h1>CreatorPilot</h1><button class="avatar" onclick="location.hash='#/account'">${esc((userName()[0]||'U').toUpperCase())}</button></div>`;
+ h+=`<div class="sec-head"><h2>Projects</h2><button class="pill-new" onclick="newProject()">+ New</button></div><div id="plist">`;
+ h+=rows.length?rows.map(projRow).join(''):`<div class="empty"><div class="t1">No projects yet.</div><div class="t2">Tap + New to start your first one.</div></div>`;
+ h+='</div></div>';
+ app().innerHTML=h;
 }
-async function handleUploads(files){
- const list=[...files].slice(0,3);
- S.uploads=[];
- const pv=$('#upPrev');pv.innerHTML='';
- for(const f of list){
-  try{
-   const url=URL.createObjectURL(f);
-   const img=await loadImg(url);
-   S.uploads.push({img:img,url:url,name:f.name});
-   const t=document.createElement('img');t.src=url;pv.appendChild(t);
-  }catch(e){toast('Image load fail: '+f.name);}
- }
- if(list.length)toast(S.uploads.length+' image(s) ready ✓');
-}
-/* ---------- progress ui ---------- */
-const P={done:{},active:null};
-function pShow(){ $('#progBox').style.display='block'; $('#resBox').style.display='none'; $('#resBox').innerHTML=''; }
-function pStage(id,state,msg){
- P.active=id;
- for(const s of ST4){const el=$('#st-'+s[0]);if(!el)continue;el.classList.remove('on','done','fail');
-  if(P.done[s[0]])el.classList.add('done');
-  else if(s[0]===id)el.classList.add(state==='fail'?'fail':'on');}
- if(state==='done')P.done[id]=true;
- if(msg!==undefined){const m=$('#pmsg');if(m){m.textContent=msg;m.classList.toggle('err',state==='fail');}}
-}
-function pPct(p,label){const b=$('#pbarI');if(b)b.style.width=p+'%';const t=$('#ppct');if(t)t.textContent=p+'%';if(label){const s=$('#pstg');if(s)s.textContent=label;}}
-/* ---------- the 4-stage engine ---------- */
-async function makeVideo(){
- if(running)return;
- const prompt=$('#pPrompt').value.trim();
- if(!prompt){toast('Pehle prompt likho ✍️');$('#pPrompt').focus();return;}
- if(!gkey()){toast('Pehle 🔑 API Key me apni free Gemini key add karo');openKeyModal();return;}
- if(S.imgMode==='upload'&&!S.uploads.length){toast('Images upload karo, ya "AI se banao" chuno');return;}
- running=true;
- const gb=$('#goBtn');gb.disabled=true;gb.classList.add('generating');gb.textContent='⏳ Video ban rahi hai...';
- pShow();P.done={};P.active=null;
- J={prompt:prompt,ratio:S.ratio,dur:S.dur,voice:S.voice,imgMode:S.imgMode,done:{},scenes:[],imgEls:[],audioBufs:[],videoUrl:null,videoBlob:null,pid:null,total:0};
+window.newProject=async()=>{
  try{
-  const pr=(await R.post('projects',{user_id:_user.id,topic:prompt.slice(0,200),language:'Hindi',video_type:S.ratio==='9:16'?'short':'long',duration_secs:S.dur,visual_style:S.ratio,voice_gender:S.voice,voice_language:'Hindi',target_audience:'General',platform:'YouTube',status:'processing',progress:0}))[0];
-  J.pid=pr.id;
-  if(!J.done.script){pStage('script','on','✍️ Script likhi ja rahi hai...');await stScript(J);J.done.script=true;pStage('script','done','✅ Script ready — '+J.scenes.length+' scenes');}
-  pPct(25,'Script ✓');await R.patch('projects?id=eq.'+J.pid,{progress:25}).catch(()=>{});
-  if(!J.done.voice){pStage('voice','on','🎙️ Voice ban rahi hai...');await stVoice(J);J.done.voice=true;pStage('voice','done','✅ Voice ready');}
-  pPct(50,'Voice ✓');await R.patch('projects?id=eq.'+J.pid,{progress:50}).catch(()=>{});
-  if(!J.done.visuals){pStage('visuals','on',J.imgMode==='upload'?'🖼️ Images lag rahi hain...':'🖼️ Scene images ban rahi hain...');await stVisuals(J);J.done.visuals=true;pStage('visuals','done','✅ Visuals ready');}
-  pPct(75,'Visuals ✓');await R.patch('projects?id=eq.'+J.pid,{progress:75}).catch(()=>{});
-  if(!J.done.render){pStage('render','on','🎬 Render ho raha hai — tab khula rakho...');await stRender(J);J.done.render=true;pStage('render','done','✅ Render complete');}
-  pPct(100,'Done 🎉');
-  await R.patch('projects?id=eq.'+J.pid,{progress:100,status:'completed'}).catch(()=>{});
-  showResult();
- }catch(e){
-  const msg=e.noKey?'Pehle 🔑 API Key me apni free Gemini key add karo':e.message;
-  if(P.active)pStage(P.active,'fail','❌ '+msg);
-  else{const m=$('#pmsg');if(m){m.textContent='❌ '+msg;m.classList.add('err');}}
-  if(J&&J.pid)await R.patch('projects?id=eq.'+J.pid,{status:'failed',progress:P.done.script?25:0}).catch(()=>{});
-  const rb=$('#resBox');rb.style.display='block';
-  rb.innerHTML=`<div class="vres no"><b>Fail ho gaya:</b> ${esc(msg)}<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn sm primary" onclick="retryJob()">↻ Retry (failed stage se)</button><button class="btn sm" onclick="resetStudio()">🔁 Nayi Video</button></div></div>`;
- }
- running=false;gb.disabled=false;gb.classList.remove('generating');gb.textContent='🎬 Video Banao';
+  const r=await R.post('projects',{user_id:_user.id,topic:'Untitled project',language:'Hindi',video_type:'short',duration_secs:30,visual_style:'9:16',voice_gender:'female',voice_language:'Hindi',target_audience:'General',platform:'YouTube',status:'draft',progress:0});
+  location.hash='#/project/'+r[0].id;
+ }catch(e){toast('❌ '+e.message);}
+};
+window.projMenu=(ev,pid)=>{
+ closeMenu();
+ const m=document.createElement('div');m.className='menu-pop';m.id='menuPop';
+ const r=ev.target.getBoundingClientRect();
+ m.style.top=Math.min(window.innerHeight-130,r.bottom+6)+'px';
+ m.style.right=Math.max(8,window.innerWidth-r.right)+'px';
+ m.innerHTML=`<button onclick="location.hash='#/project/${pid}'">📂 Open</button><button class="danger" onclick="delProject('${pid}')">🗑 Delete</button>`;
+ document.body.appendChild(m);
+ setTimeout(()=>document.addEventListener('click',closeMenu,{once:true}),10);
+};
+function closeMenu(){const m=$('#menuPop');if(m)m.remove();}
+window.delProject=async(pid)=>{
+ closeMenu();
+ if(!confirm('Delete this project?'))return;
+ try{await R.del('projects?id=eq.'+pid);delete sessionAssets[pid];toast('Deleted');nav();}
+ catch(e){toast('❌ '+e.message);}
+};
+/* ============ page: project ============ */
+async function pgProject(pid){
+ const rows=await R.get('projects?select=id,topic,created_at&order=created_at.desc&limit=1&id=eq.'+pid).catch(()=>[]);
+ if(!rows||!rows.length){location.hash='#/';return;}
+ curPid=pid;
+ if(!sessionAssets[pid])sessionAssets[pid]=[];
+ app().innerHTML=`<div class="wrap"><div class="ph">
+  <button class="backbtn" onclick="location.hash='#/'">←</button>
+  <h2>${esc(fmtDT(rows[0].created_at))}</h2>
+  <button class="icbtn" onclick="projMenu(event,'${pid}')">⋮</button></div>
+  <div id="assetZone"></div></div>`;
+ showPbar(true);
+ bindPbar();
+ renderAssets();
 }
-window.retryJob=async()=>{if(!J||running)return;$('#resBox').style.display='none';$('#resBox').innerHTML='';await makeVideo();};
-window.resetStudio=()=>{J=null;pgStudio();};
-async function stScript(J){
- const n=Math.max(1,Math.round(J.dur/5));
- const pr=await gText('You are a YouTube scriptwriter. Write a short, engaging video script in Hindi on: "'+J.prompt+'".\nMake exactly '+n+' scenes, each about 5 seconds ('+J.dur+'s total).\nRules:\n- Strong hook in the first 3 seconds.\n- One idea per scene; dialogue lines may start with SPEAKER: (e.g. ALOO: ...).\n- Caption: short and punchy (under 40 characters).\n- Visual: detailed image description — character, action, environment, lighting.\nReply ONLY as JSON: {"scenes":[{"narration":"...","visual":"...","caption":"..."}]}. No markdown, no extra text.',true);
- const list=(pr.scenes||[]).slice(0,n);
- if(!list.length)throw new Error('Gemini ne scenes nahi diye — Retry dabao.');
- while(list.length<n)list.push({narration:list[list.length-1].narration,visual:list[list.length-1].visual,caption:list[list.length-1].caption});
- const per=J.dur/n;let t=0;
- J.scenes=list.map((s,i)=>{const o={n:i+1,start:+t.toFixed(2),end:+(t+per).toFixed(2),narration:String(s.narration||'').trim(),visual:String(s.visual||'').trim(),caption:String(s.caption||'').trim()};t+=per;return o;});
- if(!J.scenes.every(s=>s.narration&&s.visual))throw new Error('Kuch scenes adhoore aaye — Retry dabao.');
-}
-async function stVoice(J){
- const voice=J.voice==='male'?'Charon':'Aoede';
- let shift=0;
- for(let i=0;i<J.scenes.length;i++){
-  const s=J.scenes[i];
-  const txt=ttsText(s.narration);
-  if(!txt)throw new Error('Scene '+(i+1)+' me narration khaali hai.');
-  const au=await gTTS(txt,voice);
-  const blob=b64ToBlob(au.data,au.mime);
-  const url=URL.createObjectURL(blob);
-  let r;try{r=await audioBuf(url);}catch(e){throw new Error('Scene '+(i+1)+' audio decode fail — Retry dabao.');}
-  const dur=r.buf.duration;
-  J.audioBufs.push(r.buf);
-  s.start=+(s.start+shift).toFixed(2);s.end=+(s.end+shift).toFixed(2);
-  if(dur>(s.end-s.start)+0.3){const delta=dur-(s.end-s.start)+0.5;s.end=+(s.end+delta).toFixed(2);shift+=delta;}
-  pStage('voice','on','🎙️ Voice: scene '+(i+1)+'/'+J.scenes.length);
-  await sleep(900);
- }
- J.total=+J.scenes[J.scenes.length-1].end.toFixed(2);
-}
-async function stVisuals(J){
- const arHint={'16:9':'16:9 widescreen composition','9:16':'vertical 9:16 portrait composition','1:1':'square 1:1 composition'}[J.ratio];
- if(J.imgMode==='upload'){
-  for(let i=0;i<J.scenes.length;i++)J.imgEls.push(S.uploads[i%S.uploads.length].img);
+function renderAssets(){
+ const z=$('#assetZone');if(!z)return;
+ const a=sessionAssets[curPid]||[];
+ if(!a.length){
+  z.innerHTML=`<div class="empty"><div class="t1">No assets yet.</div><div class="t2">Create one or upload from your gallery.</div><button class="upload-pill" onclick="document.getElementById('upFile').click()">⤴ Upload</button></div>`;
   return;
  }
- const charNote='CHARACTER CONSISTENCY: keep the exact same character design (face, clothes, colors) across all scenes of this video about "'+J.prompt.slice(0,80)+'".';
- for(let i=0;i<J.scenes.length;i++){
-  const s=J.scenes[i];
-  const im=await gImage(s.visual+'. 3D cartoon style. '+arHint+'. '+charNote+' No text, no words, no watermark anywhere in the image.');
-  J.imgEls.push(await loadImg(URL.createObjectURL(b64ToBlob(im.data,im.mime))));
-  pStage('visuals','on','🖼️ Visuals: scene '+(i+1)+'/'+J.scenes.length);
-  await sleep(1200);
+ let h='<div class="agrid">';
+ a.forEach((x,i)=>{
+  const inner=x.type==='image'?`<img src="${x.url}">`:`<video src="${x.url}" controls playsinline preload="metadata"></video>`;
+  h+=`<div class="acard">${inner}<div class="am"><span>${x.type==='image'?'🖼 Image':'🎬 Video'}</span><a class="dl" href="${x.url}" download="creatorpilot-${x.type}-${i+1}.${x.type==='image'?'jpg':'webm'}">⬇</a></div></div>`;
+ });
+ h+='</div><div class="sess-note">Assets is session me hain — page reload se pehle download kar lo.</div>';
+ z.innerHTML=h;
+}
+$('#upFile').addEventListener('change',async e=>{
+ const files=[...e.target.files].slice(0,3);
+ for(const f of files){
+  try{
+   const url=URL.createObjectURL(f);
+   await loadImg(url);
+   sessionAssets[curPid].push({type:'image',url:url});
+  }catch(err){toast('Image load fail: '+f.name);}
+ }
+ e.target.value='';
+ if(files.length){toast(files.length+' image(s) added ✓');renderAssets();}
+});
+/* ============ page: account ============ */
+function pgAccount(){
+ const u=_user||{},em=u.email||'';
+ app().innerHTML=`<div class="wrap"><div class="ph">
+  <button class="backbtn" onclick="location.hash='#/'">←</button><h2>Account</h2></div>
+ <div class="acct-card"><div class="avatar">${esc((userName()[0]||'U').toUpperCase())}</div>
+  <div><div class="acct-name">${esc(userName())}</div><div class="acct-mail">${esc(em)}</div><span class="freebadge">FREE</span></div></div>
+ <div class="rows-card"><button class="arow" onclick="openKeyModal()"><span class="ri">🔑</span><span class="tx">Gemini API key<span class="sub">${gkey()?'Saved ✓ — tap to change':'Not set — tap to add your free key'}</span></span></button></div>
+ <div class="rows-card"><button class="arow" onclick="aboutModal()"><span class="ri">ℹ️</span><span class="tx">About Us<span class="sub">What CreatorPilot is · AI transparency</span></span></button></div>
+ <div class="rows-card"><button class="arow" onclick="doLogout()"><span class="ri">🚪</span><span class="tx">Sign out</span></button></div>
+ <div class="rows-card"><button class="arow danger" onclick="delAll()"><span class="ri">🗑</span><span class="tx">Delete all projects</span></button></div>
+ </div>`;
+}
+window.delAll=async()=>{
+ if(!confirm('Saare projects delete ho jayenge. Pakka?'))return;
+ try{await R.del('projects?user_id=eq.'+_user.id);for(const k in sessionAssets)delete sessionAssets[k];toast('All projects deleted');}
+ catch(e){toast('❌ '+e.message);}
+};
+/* ============ prompt bar + bottom sheet ============ */
+function chipLabel(){return (UI.mode==='image'?'🖼':'🎬')+' ▾ x'+UI.count;}
+function bindPbar(){
+ const inp=$('#pInput'),sb=$('#sendBtn');
+ inp.value='';
+ inp.oninput=()=>{inp.style.height='auto';inp.style.height=Math.min(130,inp.scrollHeight)+'px';sb.classList.toggle('ready',inp.value.trim().length>0);};
+ $('#plusBtn').onclick=openSheet;
+ $('#modeChip').onclick=openSheet;
+ $('#sheetBg').onclick=closeSheet;
+ sb.onclick=sendPrompt;
+ updateChip();
+}
+function updateChip(){const c=$('#modeChip');if(c)c.textContent=chipLabel();}
+function openSheet(){renderSheet();$('#sheetBg').classList.add('show');}
+function closeSheet(){$('#sheetBg').classList.remove('show');}
+window.closeSheet=closeSheet;
+function arIcon(r){
+ const map={'16:9':[34,19],'4:3':[26,20],'1:1':[22,22],'3:4':[19,26],'9:16':[15,28]};
+ const w=map[r]||[22,22];
+ return `<span class="ar-ic" style="width:${w[0]}px;height:${w[1]}px"></span>`;
+}
+function renderSheet(){
+ const s=$('#sheet');
+ const mdl=UI.mode==='image'?modelDisplay('image'):modelDisplay('text');
+ let h=`<div class="grab"></div><div class="sheet-top">Gemini free tier · key sirf tumhare browser me rehti hai</div>`;
+ h+=`<div class="tabs"><button class="${UI.mode==='image'?'on':''}" onclick="setMode('image')">🖼 Image</button><button class="${UI.mode==='video'?'on':''}" onclick="setMode('video')">🎬 Video</button></div>`;
+ h+=`<div class="optlbl">Aspect ratio</div><div class="ratios">`+RATIOS.map(r=>`<button class="ratio ${UI.ratio===r?'on':''}" onclick="setRatio('${r}')">${arIcon(r)}${r}</button>`).join('')+`</div>`;
+ h+=`<div class="optlbl">Count</div><div class="counts">`+[1,2,3,4].map(n=>`<button class="${UI.count===n?'on':''}" onclick="setCount(${n})">x${n}</button>`).join('')+`</div>`;
+ if(UI.mode==='video'){
+  h+=`<div class="optlbl">Duration</div><div class="seg2">`+[15,30,60].map(d=>`<button class="${UI.dur===d?'on':''}" onclick="setDur(${d})">${d}s</button>`).join('')+`</div>`;
+  h+=`<div class="optlbl">Voice</div><div class="seg2"><button class="${UI.voice==='female'?'on':''}" onclick="setVoice('female')">👩 Female</button><button class="${UI.voice==='male'?'on':''}" onclick="setVoice('male')">👨 Male</button></div>`;
+ }
+ h+=`<button class="modelrow" onclick="closeSheet();openKeyModal()">${esc(mdl)} ▾</button>`;
+ s.innerHTML=h;
+}
+window.setMode=m=>{UI.mode=m;updateChip();renderSheet();};
+window.setRatio=r=>{UI.ratio=r;renderSheet();};
+window.setCount=n=>{UI.count=n;updateChip();renderSheet();};
+window.setDur=d=>{UI.dur=d;renderSheet();};
+window.setVoice=v=>{UI.voice=v;renderSheet();};
+/* ============ progress ui ============ */
+function gpShow(on){$('#gprog').classList.toggle('show',!!on);}
+function gpSet(pct,stage,msg,isErr){
+ $('#gpBar').style.width=pct+'%';$('#gpPct').textContent=pct+'%';
+ if(stage)$('#gpStage').textContent=stage;
+ const m=$('#gpMsg');if(msg!==undefined){m.textContent=msg;m.classList.toggle('err',!!isErr);}
+}
+/* ============ generation ============ */
+async function sendPrompt(){
+ if(running)return;
+ const inp=$('#pInput'),prompt=inp.value.trim();
+ if(!prompt){toast('Pehle kuch likho ✍️');inp.focus();return;}
+ if(!gkey()){toast('Pehle 🔑 API key add karo (Account page)');openKeyModal();return;}
+ running=true;gpShow(true);
+ inp.value='';inp.style.height='auto';$('#sendBtn').classList.remove('ready');
+ try{
+  await R.patch('projects?id=eq.'+curPid,{topic:prompt.slice(0,200),status:'processing',progress:5,duration_secs:UI.mode==='video'?UI.dur:15,visual_style:UI.ratio,voice_gender:UI.voice}).catch(()=>{});
+  if(UI.mode==='image')await genImages(prompt);
+  else await genVideos(prompt);
+  await R.patch('projects?id=eq.'+curPid,{status:'completed',progress:100}).catch(()=>{});
+  gpSet(100,'Done 🎉','Ho gaya! Neeche download kar lo.');
+  setTimeout(()=>gpShow(false),2500);
+  toast('🎉 Ready!');
+ }catch(e){
+  const msg=e.noKey?'Pehle 🔑 API key add karo (Account page)':e.message;
+  gpSet(0,'Failed',msg,true);
+  await R.patch('projects?id=eq.'+curPid,{status:'failed'}).catch(()=>{});
+ }
+ running=false;
+}
+async function genImages(prompt){
+ for(let v=0;v<UI.count;v++){
+  gpSet(Math.round(v/UI.count*100),'🖼 Image '+(v+1)+'/'+UI.count,'Image ban rahi hai...');
+  const im=await gImage(prompt+'. '+RHINT[UI.ratio]+'. '+(v>0?'(variation '+(v+1)+': different angle and lighting) ':'')+'No text, no words, no watermark anywhere in the image.');
+  const url=URL.createObjectURL(b64ToBlob(im.data,im.mime));
+  sessionAssets[curPid].push({type:'image',url:url});
+  renderAssets();
+  await sleep(900);
  }
 }
-async function stRender(J){
- const res=await renderVideo(J,pct=>{pPct(75+Math.round(pct*0.25),'Render '+pct+'%');pStage('render','on','🎬 Render '+pct+'% — tab khula rakho...');});
- J.videoUrl=res.url;J.videoBlob=res.blob;
+async function genVideos(prompt){
+ const n=Math.max(1,Math.round(UI.dur/5)),per=UI.dur/n;
+ for(let v=0;v<UI.count;v++){
+  const tag=UI.count>1?(' (variation '+(v+1)+'/'+UI.count+')'):'';
+  gpSet(Math.round(v/UI.count*100),'✍️ Script'+tag,'Script likhi ja rahi hai...');
+  const pr=await gText('You are a YouTube scriptwriter. Write a short, engaging video script in Hindi on: "'+prompt+'".\nMake exactly '+n+' scenes, each about 5 seconds ('+UI.dur+'s total).\nRules:\n- Strong hook in the first 3 seconds.\n- One idea per scene; dialogue lines may start with a SPEAKER label in caps followed by a colon.\n- Caption: short and punchy (under 40 characters).\n- Visual: detailed image description — character, action, environment, lighting.'+(v>0?'\n- This is variation '+(v+1)+': use different camera angles, lighting and compositions than usual.':'')+'\nReply ONLY as JSON: {"scenes":[{"narration":"...","visual":"...","caption":"..."}]}. No markdown, no extra text.',true);
+  const list=(pr.scenes||[]).slice(0,n);
+  if(!list.length)throw new Error('Gemini ne scenes nahi diye — dobara try karo.');
+  while(list.length<n)list.push({narration:list[list.length-1].narration,visual:list[list.length-1].visual,caption:list[list.length-1].caption});
+  let t=0;
+  const scenes=list.map(s=>{const o={narration:String(s.narration||'').trim(),visual:String(s.visual||'').trim(),caption:String(s.caption||'').trim(),start:+t.toFixed(2),end:+(t+per).toFixed(2)};t+=per;return o;});
+  if(!scenes.every(s=>s.narration&&s.visual))throw new Error('Kuch scenes adhoore aaye — dobara try karo.');
+  // voice
+  const voice=UI.voice==='male'?'Charon':'Aoede';
+  const audioBufs=[];let shift=0;
+  for(let i=0;i<scenes.length;i++){
+   const s=scenes[i],txt=ttsText(s.narration);
+   if(!txt)throw new Error('Scene '+(i+1)+' me narration khaali hai.');
+   gpSet(Math.round((v+i/scenes.length)/UI.count*100),'🎙️ Voice'+tag,'Scene '+(i+1)+'/'+scenes.length+' ki voice...');
+   const au=await gTTS(txt,voice);
+   const url=URL.createObjectURL(b64ToBlob(au.data,au.mime));
+   let r;try{r=await audioBuf(url);}catch(e){throw new Error('Scene '+(i+1)+' audio decode fail — dobara try karo.');}
+   const dur=r.buf.duration;audioBufs.push(r.buf);
+   s.start=+(s.start+shift).toFixed(2);s.end=+(s.end+shift).toFixed(2);
+   if(dur>(s.end-s.start)+0.3){const delta=dur-(s.end-s.start)+0.5;s.end=+(s.end+delta).toFixed(2);shift+=delta;}
+   await sleep(800);
+  }
+  const total=+scenes[scenes.length-1].end.toFixed(2);
+  // visuals
+  const imgEls=[];
+  const charNote='CHARACTER CONSISTENCY: keep the exact same character design (face, clothes, colors) across all scenes of this video about "'+prompt.slice(0,80)+'".';
+  for(let i=0;i<scenes.length;i++){
+   gpSet(Math.round((v+i/scenes.length)/UI.count*100),'🖼️ Visuals'+tag,'Scene '+(i+1)+'/'+scenes.length+' ki image...');
+   const im=await gImage(scenes[i].visual+'. 3D cartoon style. '+RHINT[UI.ratio]+'. '+charNote+(v>0?' Variation '+(v+1)+': different camera angle and lighting.':'')+' No text, no words, no watermark anywhere in the image.');
+   imgEls.push(await loadImg(URL.createObjectURL(b64ToBlob(im.data,im.mime))));
+   await sleep(1000);
+  }
+  // render
+  gpSet(Math.round(v/UI.count*100),'🎬 Render'+tag,'Render ho raha hai — tab khula rakho...');
+  const J={scenes:scenes,imgEls:imgEls,audioBufs:audioBufs,total:total,ratio:UI.ratio};
+  const res=await renderVideo(J,pct=>gpSet(Math.round((v+pct/100)/UI.count*100),'🎬 Render'+tag,pct+'% — tab khula rakho...'));
+  sessionAssets[curPid].push({type:'video',url:res.url});
+  renderAssets();
+ }
 }
-function showResult(){
- const rb=$('#resBox');rb.style.display='block';
- rb.innerHTML=`<h2 style="margin-bottom:8px">🎉 Video ready!</h2>
- <video class="out" src="${J.videoUrl}" controls playsinline></video>
- <div class="resbtns"><a class="btn primary" href="${J.videoUrl}" download="creatorpilot-video.webm">⬇️ Download (.webm)</a><button class="btn" onclick="resetStudio()">🔁 Nayi Video</button></div>
- <div class="note"><b>Note:</b> video isi browser session me hai — page reload se pehle <b>download</b> kar lo. Format .webm hai (YouTube accept karta hai).</div>`;
- rb.scrollIntoView({behavior:'smooth',block:'start'});
- toast('🎉 Video ready!');
-}
-/* ---------- canvas renderer (Ken Burns + burned captions + Web Audio sync) ---------- */
 async function renderVideo(J,onProg){
  const scenes=J.scenes;
  if(!scenes.length)throw new Error('Scenes missing hain.');
- if(J.imgEls.length!==scenes.length||J.audioBufs.length!==scenes.length)throw new Error('Visuals/voice adhoore hain — Retry dabao.');
+ if(J.imgEls.length!==scenes.length||J.audioBufs.length!==scenes.length)throw new Error('Visuals/voice adhoore hain — dobara try karo.');
  const caps=cuesFromScenes(scenes);
- const dims=DIMS[J.ratio]||DIMS['16:9'],W=dims[0],H=dims[1];
+ const dims=RDIMS[J.ratio]||RDIMS['9:16'],W=dims[0],H=dims[1];
  const cv=document.createElement('canvas');cv.width=W;cv.height=H;
  const cx=cv.getContext('2d');
  const AC=audioBuf._c;
- if(!AC)throw new Error('Audio system ready nahi — Voice stage dobara chalao.');
+ if(!AC)throw new Error('Audio system ready nahi — dobara try karo.');
  const dest=AC.createMediaStreamDestination();
  const t0=AC.currentTime+0.4;
  scenes.forEach((s,i)=>{
@@ -509,7 +635,7 @@ async function renderVideo(J,onProg){
  if(!tracks.length)throw new Error('Canvas capture fail — browser support check karo.');
  const mime=['video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm'].find(m=>window.MediaRecorder&&MediaRecorder.isTypeSupported(m));
  if(!mime)throw new Error('Is browser me MediaRecorder/webm support nahi hai.');
- const rec=new MediaRecorder(new MediaStream(tracks),{mimeType:mime,videoBitsPerSecond:J.ratio==='9:16'?6000000:8000000});
+ const rec=new MediaRecorder(new MediaStream(tracks),{mimeType:mime,videoBitsPerSecond:6000000});
  const chunks=[];rec.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data);};
  const doneP=new Promise(res=>{rec.onstop=res;});
  rec.start(500);
@@ -550,19 +676,6 @@ async function renderVideo(J,onProg){
  const blob=new Blob(chunks,{type:'video/webm'});
  const url=URL.createObjectURL(blob);
  return{url:url,blob:blob,total:total};
-}
-/* ============ page: my videos ============ */
-async function pgVideos(){
- setNav('videos');
- const rows=await R.get('projects?select=id,topic,visual_style,duration_secs,status,created_at&order=created_at.desc&limit=50').catch(e=>{throw e});
- let h=`<div class="studio"><div class="panel"><h2>📁 My Videos</h2><div class="ph-sub">${rows.length} video(s)</div>`;
- if(!rows.length)h+='<div class="empty">Abhi koi video nahi bani.<br><br><button class="btn primary" onclick="location.hash=\'#/studio\'">🎬 Pehli video banao</button></div>';
- for(const p of rows){
-  h+=`<div class="proj"><div class="t">${esc(p.topic)||'(bina naam)'}</div>
-  <div class="m">${stBadge(p.status)}<span>${esc(p.visual_style||'16:9')}</span><span>${fmtDur(p.duration_secs)}</span><span>${fmtDate(p.created_at)}</span></div></div>`;
- }
- h+='</div>'+aboutHtml+'</div>';
- app().innerHTML=h;
 }
 /* ============ init ============ */
 handleAuthReturn();
