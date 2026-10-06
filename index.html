@@ -186,7 +186,7 @@ window.dl=dl;
 const app=()=>document.getElementById('app');
 function setNav(route){
  const u=_user;
- const links=[['dashboard','Dashboard'],['create','＋ Create'],['channel','Channel'],['analytics','Analytics']];
+ const links=[['dashboard','Dashboard'],['create','＋ Create'],['channel','Channel'],['analytics','Analytics'],['settings','⚙️ Settings']];
  $('#nav').innerHTML=u?links.map(l=>'<a href="#/'+l[0]+'" class="'+(route===l[0]?'on':'')+'">'+l[1]+'</a>').join(''):'';
  $('#huser').textContent=u?(u.email||''):'';
  $('#hact').innerHTML=u?'<button class="btn sm" onclick="doLogout()">Logout</button>':'';
@@ -204,6 +204,7 @@ async function nav(){
   else if(page==='project')await pgProject(seg[1]);
   else if(page==='channel')await pgChannel();
   else if(page==='analytics')await pgAnalytics();
+  else if(page==='settings')pgSettings();
   else app().innerHTML='<div class="empty">Page not found.</div>';
  }catch(e){app().innerHTML='<div class="vres no"><b>Error:</b> '+esc(e.message)+'</div>';}
  window.scrollTo(0,0);
@@ -331,7 +332,7 @@ function pgCreate(){
   <div class="field"><label>Platform</label><select class="inp" id="cPlat"><option>YouTube</option></select></div>
  </div>
  <button class="btn primary" id="cGo" style="width:100%;padding:13px">⚡ Generate Video</button>
- <div class="note"><b>Honest note:</b> Generate dabane par project + 9 pipeline jobs (queued) bante hain. AI steps (research, script, visuals, voice, render, thumbnail, upload) Phase 2 me API keys judne par chalenge — tab tak <b>scene builder, validation, captions aur SEO</b> abhi use karo.</div>
+ <div class="note"><b>Honest note:</b> Generate dabane par project + 9 pipeline jobs (queued) bante hain. AI steps chalane ke liye <b>Settings</b> me apni <b>free Gemini API key</b> add karo — bina key ke koi fake video/image/voice nahi banega. <b>Scene builder, validation, captions aur SEO</b> bina key ke bhi kaam karte hain.</div>
  </div>`;
  $('#cType').onchange=e=>{$('#cDur').value=e.target.value==='short'?60:1200;};
  $('#cGo').onclick=async()=>{
@@ -340,7 +341,7 @@ function pgCreate(){
   const u=_user;$('#cGo').disabled=true;
   try{
    const p=(await R.post('projects',{user_id:u.id,topic:topic,language:$('#cLang').value,video_type:$('#cType').value,duration_secs:parseInt($('#cDur').value)||60,visual_style:$('#cStyle').value,voice_gender:$('#cVG').value,voice_language:$('#cVL').value,target_audience:$('#cAud').value,platform:$('#cPlat').value,status:'processing'}))[0];
-   for(const s of STEPS)await R.post('generation_jobs',{project_id:p.id,step:s[0],status:'queued',detail:'Awaiting '+(AI_WAIT.has(s[0])?'AI service (Phase 2)':'input')});
+   for(const s of STEPS)await R.post('generation_jobs',{project_id:p.id,step:s[0],status:'queued',detail:'Awaiting '+(AI_WAIT.has(s[0])?'Gemini API key (Settings)':'input')});
    await R.post('render_jobs',{project_id:p.id,status:'queued'});
    toast('Project created — 9 jobs queued');location.hash='#/project/'+p.id;
   }catch(e){toast('Failed: '+e.message);$('#cGo').disabled=false;}
@@ -369,14 +370,18 @@ async function pgProject(pid){
   <div class="sd">${j?(esc(j.detail||'')+(j.error?' · <span style="color:#ff8f8f">'+esc(j.error)+'</span>':'')):'job row missing'}</div></div>
   ${stBadge(st)}
   ${st==='failed'?`<button class="btn sm" onclick="retryJob('${pid}','${s[0]}')">Retry</button>`:''}
-  ${AI_WAIT.has(s[0])&&st==='queued'?'<span class="sd">Awaiting AI service — Phase 2</span>':''}
+  ${st==='queued'&&NEEDS_RUN.has(s[0])?`<button class="btn sm" onclick="runOne('${pid}','${s[0]}')">▶ Run</button><span class="sd">${RUN_HINT[s[0]]||''}</span>`:''}
   </div></div>`;
  }
- h+=`</div><div class="note"><b>Phase 1 reality:</b> <b>Scene Plan</b> (validate below), <b>Script</b> (manual entry below), <b>Captions</b> (generator below) abhi kaam karte hain. Research, Visuals, Voice, Render, Thumbnail, Upload ko Phase 2 me API keys chahiye — ye kabhi fake "completed" nahi dikhayenge.</div></div>`;
- h+=`<div id="secScript"></div><div id="secScenes"></div><div id="secSEO"></div><div id="secCaps"></div><div id="secUpload"></div>`;
+ h+=`</div><div style="display:flex;gap:8px;flex-wrap:wrap;margin:2px 0 12px"><button class="btn primary" id="genAll">⚡ Generate full video (AI)</button></div><div class="note"><b>Phase 2 live:</b> saare AI steps asli hain — Research, Script, Visuals, Voice, Render, Thumbnail, Upload. <b>⚙️ Settings</b> me apni free Gemini API key add karo, phir "⚡ Generate full video" dabao ya har step par "▶ Run". Bina key ke AI buttons key mangenge — kabhi fake output nahi milega.</div></div>`;
+ h+=`<div id="secResearch"></div><div id="secScript"></div><div id="secScenes"></div><div id="secSEO"></div><div id="secCaps"></div><div id="secRender"></div><div id="secUpload"></div>`;
  app().innerHTML=h;
  $('#pDel').onclick=async()=>{if(confirm('Delete "'+p.topic+'"?')){await R.del('projects?id=eq.'+pid);toast('Deleted');location.hash='#/dashboard';}};
- renderScriptSec(p);renderScenesSec(p,m);renderSEOSec(p);renderCapsSec(p,m);renderUploadSec(p,m);
+ renderScriptSec(p);renderScenesSec(p,m);renderSEOSec(p);renderCapsSec(p,m);renderUploadSec(p,m);renderResearchSec(p);renderRenderSec(p);
+ $('#genAll').onclick=async()=>{
+  if(!gkey()){toast('Pehle Settings me apni free Gemini API key add karo');location.hash='#/settings';return;}
+  $('#genAll').disabled=true;await runAll(pid);$('#genAll').disabled=false;nav();
+ };
 }
 async function retryJob(pid,step){
  const j=(await R.get('generation_jobs?select=id,attempts&project_id=eq.'+pid+'&step=eq.'+step))[0];if(!j)return;
@@ -395,7 +400,7 @@ async function renderScriptSec(p){
  const rows=await R.get('scripts?select=*&project_id=eq.'+p.id+'&order=created_at.desc&limit=1');
  const cur=rows[0];
  const words=cur?cur.content.trim().split(/\s+/).filter(Boolean).length:0;
- el.innerHTML=`<div class="panel"><h2>📝 Script</h2><div class="ph-sub">AI script Phase 2 me aayega. Abhi script manually likho/paste karo — word count aur duration estimate real hai.</div>
+ el.innerHTML=`<div class="panel"><h2>📝 Script</h2><div class="ph-sub">"✨ Generate with AI" dabao (Gemini key chahiye — Settings) ya script manually likho/paste karo. Word count aur duration estimate real hai.</div>
  ${cur?`<div class="kv" style="font-size:13px;color:var(--mut)">${words} words · ~${fmtDur(words/140*60)} at 140 wpm</div>
  <pre class="code" style="max-height:220px;overflow:auto;margin:10px 0">${esc(cur.content)}</pre>`:'<div class="empty" style="padding:16px">No script yet.</div>'}
  <textarea class="inp" id="scTxt" placeholder="Script yahan likho ya paste karo...">${cur?esc(cur.content):''}</textarea>
@@ -406,7 +411,14 @@ async function renderScriptSec(p){
  </div></div>`;
  const upd=()=>{const w=$('#scTxt').value.trim().split(/\s+/).filter(Boolean).length;$('#scEst').textContent=w?('≈ '+fmtDur(w/140*60)+' at 140 wpm'):'';};
  $('#scTxt').oninput=upd;upd();
- $('#scAI').onclick=()=>toast('AI script generation needs an LLM API key — Phase 2. Manual entry works now.');
+ $('#scAI').onclick=async()=>{
+  const b=$('#scAI');b.disabled=true;
+  try{
+   const n=(await R.get('scenes?select=id&project_id=eq.'+p.id+'&limit=1')).length;
+   if(n&&!confirm('AI script purane scenes ko REPLACE kar dega. Continue?')){b.disabled=false;return;}
+   await runStep(p.id,'script');toast('✅ AI script + scenes ready');nav();
+  }catch(e){toast('❌ '+(e.noKey?'Settings me Gemini API key add karo':e.message));b.disabled=false;}
+ };
  $('#scSave').onclick=async()=>{
   const t=$('#scTxt').value.trim();if(!t){toast('Script empty hai');return;}
   const w=t.split(/\s+/).filter(Boolean).length;
@@ -601,7 +613,7 @@ async function renderUploadSec(p,m){
  const el=$('#secUpload');if(!el)return;
  const ups=await R.get('youtube_uploads?select=*&project_id=eq.'+p.id+'&order=created_at.desc').catch(()=>[]);
  const chs=await R.get('youtube_channels?select=id,channel_name&user_id=eq.'+_user.id).catch(()=>[]);
- let h=`<div class="panel"><h2>📤 YouTube Upload</h2><div class="ph-sub">Draft yahin banta hai. Asli upload ke liye YouTube OAuth Phase 2 me judega — password kabhi nahi manga jayega.</div>`;
+ let h=`<div class="panel"><h2>📤 YouTube Upload</h2><div class="ph-sub">Draft yahin banta hai. "⬆ Upload to YouTube" dabane par Google OAuth sign-in hoga, phir rendered video + thumbnail asli me upload hoga — password yahan kabhi nahi manga jayega.</div>`;
  if(!ups.length)h+='<div class="empty" style="padding:14px">No upload draft — SEO section se "Save as upload draft" karo.</div>';
  for(const u of ups){
   h+=`<div class="scene"><div class="sh"><span class="sid">${esc(u.title)||'(untitled)'}</span><span style="flex:1"></span>${stBadge(u.status)}<span class="badge b-draft">${esc(u.visibility)}</span></div>
@@ -613,7 +625,7 @@ async function renderUploadSec(p,m){
    <button class="btn sm primary" data-up="${u.id}">⬆ Upload to YouTube</button>
   </div></div>`;
  }
- h+='<div class="note"><b>Phase 2:</b> YouTube OAuth connect + video file upload + thumbnail upload + schedule. Abhi draft save karna real hai; upload button imandari se batayega ki OAuth pending hai.</div></div>';
+ h+='<div class="note"><b>Asli upload:</b> rendered video (isi session ka) + SEO draft + thumbnail YouTube par jayega. Pehli baar Google sign-in (OAuth) hoga — password yahan kabhi nahi manga jayega. Upload ke baad YouTube Studio me "altered content" disclosure tick karna hota hai (API se set nahi hota).</div></div>';
  el.innerHTML=h;
  el.querySelectorAll('[data-save]').forEach(b=>b.onclick=async()=>{
   const id=b.dataset.save;
@@ -621,11 +633,10 @@ async function renderUploadSec(p,m){
   toast('Draft updated');
  });
  el.querySelectorAll('[data-up]').forEach(b=>b.onclick=async()=>{
-  const id=b.dataset.up;
-  await R.patch('youtube_uploads?id=eq.'+id,{status:'queued'});
-  await setJob(p.id,'upload','failed','YouTube OAuth not connected (Phase 2)');
-  await R.patch('youtube_uploads?id=eq.'+id,{status:'failed',error:'YouTube OAuth not connected (Phase 2)'});
-  toast('Upload needs YouTube OAuth — Phase 2');nav();
+  b.disabled=true;
+  try{await runStep(p.id,'upload');toast('✅ Upload complete!');}
+  catch(e){if(e&&e.message!=='OAUTH_REDIRECT')toast('❌ '+e.message);}
+  b.disabled=false;nav();
  });
 }
 /* ============ channel page ============ */
@@ -637,11 +648,11 @@ async function pgChannel(){
  h+=`<h3>Add channel</h3><div class="grid2"><div class="field"><label>Channel name *</label><input class="inp" id="chN" placeholder="My Channel"></div>
  <div class="field"><label>Handle</label><input class="inp" id="chH" placeholder="@mychannel"></div></div>
  <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn primary sm" id="chAdd">Save channel</button><button class="btn sm" id="chOAuth">🔗 Connect with Google (OAuth)</button></div>
- <div class="note"><b>OAuth:</b> asli Google sign-in Phase 2 me — API keys aur server consent chahiye. Abhi channel manually save karna real hai.</div></div>`;
+ <div class="note"><b>OAuth:</b> "🔗 Connect with Google" dabane par asli Google sign-in hoga (apna OAuth Client ID Settings me save karo). Channel manually save karna bhi real hai.</div></div>`;
  app().innerHTML=h;
  $('#chAdd').onclick=async()=>{const n=$('#chN').value.trim();if(!n){toast('Channel name likho');return;}
   await R.post('youtube_channels',{user_id:_user.id,channel_name:n,channel_handle:$('#chH').value.trim()});toast('Channel saved');nav();};
- $('#chOAuth').onclick=()=>toast('YouTube OAuth Phase 2 me aayega — abhi manual entry use karo.');
+ $('#chOAuth').onclick=()=>ytOAuth('#/channel');
 }
 window.delChannel=async id=>{if(confirm('Delete channel?')){await R.del('youtube_channels?id=eq.'+id);toast('Deleted');nav();}};
 /* ============ analytics page ============ */
@@ -652,8 +663,536 @@ async function pgAnalytics(){
  else h+='<table class="tbl"><tr><th>Metric</th><th>Value</th><th>Project</th><th>Recorded</th></tr>'+rows.map(r=>'<tr><td>'+esc(r.metric)+'</td><td>'+esc(r.value)+'</td><td>'+esc((r.projects||{}).topic||'—')+'</td><td>'+fmtDate(r.recorded_at)+'</td></tr>').join('')+'</table>';
  app().innerHTML=h+'</div>';
 }
+/* ================================================================
+   PHASE 2 — real AI pipeline (2026-10-06). No mocks, no fake output.
+   - Gemini key: localStorage only ('cp_gemini_key'), calls go DIRECTLY
+     from this browser to generativelanguage.googleapis.com. Nothing is
+     proxied or stored on any server.
+   - YouTube OAuth token: sessionStorage only (tab close = logout).
+   - Rendered video / generated images / voice clips live in this browser
+     session (blob URLs). Small clips are ALSO saved as data URLs in the
+     DB text columns; big ones stay session-only (said honestly in UI).
+   ================================================================ */
+const LS={gk:'cp_gemini_key',gm:'cp_gemini_model',gi:'cp_gemini_img_model',gt:'cp_gemini_tts_model',oc:'cp_oauth_client'};
+const gkey=()=> (localStorage.getItem(LS.gk)||'').trim();
+const gmodel=()=> (localStorage.getItem(LS.gm)||'').trim()||'gemini-2.0-flash';
+const gimgmodel=()=> (localStorage.getItem(LS.gi)||'').trim()||'gemini-2.0-flash-preview-image-generation';
+const gttsmodel=()=> (localStorage.getItem(LS.gt)||'').trim()||'gemini-2.5-flash-preview-tts';
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+/* per-step run hints for the stepper (accurate per step) */
+const NEEDS_RUN=new Set(['research','visual','voice','render','thumbnail','upload']);
+const RUN_HINT={research:'Needs Gemini key — <a href="#/settings">Settings</a>',visual:'Needs Gemini key — <a href="#/settings">Settings</a>',voice:'Needs Gemini key — <a href="#/settings">Settings</a>',render:'Browser me render hoga (koi key nahi chahiye)',thumbnail:'3 concepts banenge (headline ke liye key)',upload:'Rendered video + YouTube OAuth chahiye'};
+function gMsg(st,d,what){
+ const m=(d&&(d.error&&d.error.message))||'';
+ if(st===400)return 'API key galat hai ya model available nahi. Settings me key/model check karo.'+(m?' ('+m.slice(0,120)+')':'');
+ if(st===401||st===403)return 'Key reject hui (401/403) — ya to key galat hai, ya us par restriction hai, ya Gemini API enable nahi hai.'+(m?' ('+m.slice(0,120)+')':'');
+ if(st===404)return 'Model nahi mila (404) — Settings me model ka naam check karo.';
+ if(st===429)return 'Gemini free-tier quota / rate-limit khatam (429). Ye normal hai — kuch der baad Retry dabao, paise nahi lagenge.';
+ if(st>=500)return 'Google server error ('+st+') — thodi der baad retry karo.';
+ return (what||'Gemini')+' request fail ('+st+').'+(m?' '+m.slice(0,140):'');
+}
+async function gCall(model,body,what){
+ const k=gkey();
+ if(!k){const e=new Error('NO_KEY');e.noKey=true;throw e;}
+ const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+encodeURIComponent(model)+':generateContent?key='+encodeURIComponent(k),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+ const d=await r.json().catch(()=>({}));
+ if(!r.ok)throw new Error(gMsg(r.status,d,what));
+ return d;
+}
+function gParts(d){try{return (((d.candidates||[])[0]||{}).content||{}).parts||[];}catch(e){return[];}}
+async function gText(prompt,json){
+ const body={contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.7}};
+ if(json)body.generationConfig.responseMimeType='application/json';
+ const d=await gCall(gmodel(),body,'Text');
+ let t=gParts(d).map(p=>p.text||'').join('');
+ if(!t.trim())throw new Error('Gemini se khaali jawab aaya — dobara try karo.');
+ if(json){t=t.replace(/```json|```/gi,'').trim();const a=t.indexOf('{'),b=t.lastIndexOf('}');if(a>=0&&b>a)t=t.slice(a,b+1);
+  try{return JSON.parse(t);}catch(e){throw new Error('Gemini ne sahi JSON nahi diya — Retry dabao.');}}
+ return t;
+}
+async function gImage(prompt){
+ const d=await gCall(gimgmodel(),{contents:[{parts:[{text:prompt}]}],generationConfig:{responseModalities:['TEXT','IMAGE']}},'Image');
+ const p=gParts(d).find(p=>p.inlineData&&/^image\//.test(p.inlineData.mimeType||''));
+ if(!p)throw new Error('Gemini ne image nahi di (safety filter ya quota ho sakta hai) — Retry dabao.');
+ return{mime:p.inlineData.mimeType,data:p.inlineData.data};
+}
+async function gTTS(text,voice){
+ const d=await gCall(gttsmodel(),{contents:[{parts:[{text:text}]}],generationConfig:{responseModalities:['AUDIO'],speechConfig:{voiceConfig:{prebuiltVoiceConfig:{voiceName:voice}}}}},'Voice');
+ const p=gParts(d).find(p=>p.inlineData&&/^audio\//.test(p.inlineData.mimeType||''));
+ if(!p)throw new Error('Gemini ne audio nahi diya — Retry dabao.');
+ return{mime:p.inlineData.mimeType,data:p.inlineData.data};
+}
+/* ---------- session asset stores ---------- */
+const _IMG={},_VO={};            // assetId -> blobURL, voiceoverId -> blobURL
+let _renderBlob=null,_renderUrl=null;
+function b64ToBlob(b64,mime){const bin=atob(b64);const u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return new Blob([u],{type:mime});}
+function dataUrl(mime,b64){return 'data:'+mime+';base64,'+b64;}
+function imgFor(a){if(_IMG[a.id])return _IMG[a.id];return a.storage_path||null;}
+function audFor(v){if(_VO[v.id])return _VO[v.id];return v.audio_path||null;}
+function loadImg(src){return new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=()=>rej(new Error('Image load fail'));i.src=src;});}
+async function audioBuf(url){
+ const AC=audioBuf._c||(audioBuf._c=new (window.AudioContext||window.webkitAudioContext)());
+ if(AC.state==='suspended'){try{await AC.resume();}catch(e){}}
+ const ab=await (await fetch(url)).arrayBuffer();
+ return{ac:AC,buf:await AC.decodeAudioData(ab)};
+}
+function drawCoverCtx(x,img,W,H,zoom,panX,alpha){
+ if(alpha!=null)x.globalAlpha=alpha;
+ const ir=img.width/img.height,cr=W/H;let bw,bh;
+ if(ir>cr){bh=H*(zoom||1);bw=bh*ir;}else{bw=W*(zoom||1);bh=bw/ir;}
+ x.drawImage(img,(W-bw)/2+(panX||0)*W,(H-bh)/2,bw,bh);
+ if(alpha!=null)x.globalAlpha=1;
+}
+/* ---------- job helpers ---------- */
+async function setJobErr(pid,step,msg){
+ const j=(await R.get('generation_jobs?select=id&project_id=eq.'+pid+'&step=eq.'+step))[0];if(!j)return;
+ await R.patch('generation_jobs?id=eq.'+j.id,{status:'failed',error:String(msg).slice(0,500),detail:null,updated_at:new Date().toISOString()});
+ await refreshProgress(pid);
+}
+async function setJobRun(pid,step,detail){
+ const j=(await R.get('generation_jobs?select=id&project_id=eq.'+pid+'&step=eq.'+step))[0];if(!j)return;
+ await R.patch('generation_jobs?id=eq.'+j.id,{status:'processing',detail:detail||'Running…',error:null,updated_at:new Date().toISOString()});
+ await refreshProgress(pid);
+}
+/* ---------- STEP: research ---------- */
+async function doResearch(p){
+ const pr=await gText('You are a fact researcher for a YouTube video.\nTopic: "'+p.topic+'"\nLanguage: '+p.language+'\nGive 5 to 10 short, checkable facts useful for this video. Reply ONLY as JSON: {"facts":[{"claim":"...","source":"publisher or site name","url":"https://..."}]}. Use real, well-known sources (Wikipedia, Britannica, National Geographic, etc.). No markdown, no extra text.',true);
+ const facts=(pr.facts||[]).slice(0,10);
+ if(!facts.length)throw new Error('Gemini ne koi fact nahi diya.');
+ await R.del('research_sources?project_id=eq.'+p.id);
+ for(const f of facts){
+  await R.post('research_sources',{project_id:p.id,claim:String(f.claim||'').slice(0,500),source:String(f.source||'').slice(0,200),url:String(f.url||'').slice(0,500),verified:false});
+  await sleep(150);
+ }
+ await setJob(p.id,'research','completed',facts.length+' facts collected — tick karke verify karo');
+}
+/* ---------- STEP: AI script + scenes ---------- */
+async function doAIScript(p){
+ const rs=await R.get('research_sources?select=claim,source&project_id=eq.'+p.id+'&verified=eq.true').catch(()=>[]);
+ const factBlock=rs.length?('Use ONLY these verified facts (each at most once):\n'+rs.map((r,i)=>(i+1)+'. '+r.claim+' ('+r.source+')').join('\n')+'\n'):'No verified facts available — use only facts you are highly confident about; avoid specific statistics.\n';
+ const pr=await gText('You are a YouTube scriptwriter.\nWrite a scene-wise script in '+p.language+' for a '+(p.video_type==='short'?'vertical YouTube Short':'long YouTube video')+' titled "'+p.topic+'".\nTotal duration: '+p.duration_secs+' seconds. Visual style: '+p.visual_style+'. Audience: '+p.target_audience+'.\n'+factBlock+'Rules:\n- Strong hook in the first 3 seconds.\n- One idea per scene; dialogue lines may start with SPEAKER: (e.g. ALOO: ...).\n- Captions short and punchy (under 40 characters).\n- Visual: detailed description with character, action, environment, lighting.\nReply ONLY as JSON: {"scenes":[{"narration":"...","visual":"...","caption":"...","camera":"...","sfx":"...","transition":"...","duration_secs":5}]}\nScene durations should add up to about '+p.duration_secs+' seconds. No markdown.',true);
+ const list=(pr.scenes||[]);
+ if(!list.length)throw new Error('Gemini ne scenes nahi diye.');
+ let sum=list.reduce((a,s)=>a+(+s.duration_secs||5),0)||1;
+ let t=0;const rows=[];
+ list.forEach((s,i)=>{
+  const d=Math.max(2,Math.round((+s.duration_secs||5)/sum*p.duration_secs));
+  rows.push({scene_id:i+1,start_secs:+t.toFixed(2),end_secs:+(t+d).toFixed(2),narration:String(s.narration||''),visual:String(s.visual||''),caption:String(s.caption||''),camera:String(s.camera||''),sfx:String(s.sfx||''),transition:String(s.transition||'')});
+  t+=d;
+ });
+ rows[rows.length-1].end_secs=+t.toFixed(2);
+ await R.del('scenes?project_id=eq.'+p.id);
+ for(const r of rows){await R.post('scenes',Object.assign({project_id:p.id},r));await sleep(120);}
+ const full=rows.map(r=>'SCENE '+r.scene_id+'\nVOICE: '+r.narration+'\nVISUAL: '+r.visual).join('\n\n');
+ const ex=await R.get('scripts?select=id&project_id=eq.'+p.id+'&order=created_at.desc&limit=1');
+ if(ex[0])await R.patch('scripts?id=eq.'+ex[0].id,{content:full,word_count:full.split(/\s+/).filter(Boolean).length});
+ else await R.post('scripts',{project_id:p.id,content:full,word_count:full.split(/\s+/).filter(Boolean).length});
+ await setJob(p.id,'script','completed','AI script: '+rows.length+' scenes, ~'+t.toFixed(0)+'s');
+ const v=validateScenes(rows,p);
+ await setJob(p.id,'scene',v.ok?'completed':'failed',v.ok?('Validated: '+rows.length+' scenes locked, '+v.total.toFixed(1)+'s timeline'):('Validation failed: '+v.errs[0]));
+ if(!v.ok)throw new Error('Scene validation fail: '+v.errs[0]);
+}
+/* ---------- STEP: visuals ---------- */
+async function doVisuals(p){
+ const scenes=await R.get('scenes?select=*&project_id=eq.'+p.id+'&order=scene_id');
+ if(!scenes.length)throw new Error('Pehle script/scenes banao.');
+ const ar=p.video_type==='short'?'vertical 9:16 portrait composition':'16:9 widescreen composition';
+ const charNote='CHARACTER CONSISTENCY: keep the exact same character design (face, clothes, colors) across all scenes of this video about "'+p.topic+'".';
+ await R.del('assets?project_id=eq.'+p.id);
+ let n=0;
+ for(const s of scenes){
+  const prompt=s.visual+'. Art style: '+p.visual_style+'. '+ar+'. '+charNote+' No text, no words, no letters, no watermark anywhere in the image.';
+  const im=await gImage(prompt);
+  const blob=b64ToBlob(im.data,im.mime);
+  const row=(await R.post('assets',{project_id:p.id,scene_id:s.scene_id,kind:'image',prompt:prompt.slice(0,1000),storage_path:null,status:'completed'}))[0];
+  _IMG[row.id]=URL.createObjectURL(blob);
+  const approxKB=Math.round(im.data.length*0.75/1024);
+  if(approxKB<900)await R.patch('assets?id=eq.'+row.id,{storage_path:dataUrl(im.mime,im.data)});
+  n++;await setJobRun(p.id,'visual','Scene '+s.scene_id+'/'+scenes.length+' image done');
+  await sleep(1200);
+ }
+ await setJob(p.id,'visual','completed',n+' scene images generated (Gemini)');
+}
+/* ---------- STEP: voice ---------- */
+function ttsText(nar){
+ return String(nar||'').split('\n').map(l=>l.replace(/^[A-Z\u0900-\u0975][A-Z\u0900-\u0975\s.'’-]{1,24}:\s*/,'').trim()).filter(Boolean).join(' ');
+}
+async function doVoice(p){
+ const scenes=await R.get('scenes?select=*&project_id=eq.'+p.id+'&order=scene_id');
+ if(!scenes.length)throw new Error('Pehle scenes banao.');
+ const voice=p.voice_gender==='male'?'Charon':'Aoede';
+ await R.del('voiceovers?project_id=eq.'+p.id);
+ let shift=0;
+ for(const s of scenes){
+  const txt=ttsText(s.narration);
+  if(!txt)throw new Error('Scene '+s.scene_id+' me narration khaali hai.');
+  const au=await gTTS(txt,voice);
+  const blob=b64ToBlob(au.data,au.mime);
+  const tmpUrl=URL.createObjectURL(blob);
+  let dur;
+  try{dur=+((await audioBuf(tmpUrl)).buf.duration).toFixed(2);}catch(e){throw new Error('Scene '+s.scene_id+' audio decode fail — Retry dabao.');}
+  const row=(await R.post('voiceovers',{project_id:p.id,scene_id:s.scene_id,text:txt,voice:voice,audio_path:null,duration_secs:dur,status:'completed'}))[0];
+  _VO[row.id]=URL.createObjectURL(blob);
+  const approxKB=Math.round(au.data.length*0.75/1024);
+  if(approxKB<1500)await R.patch('voiceovers?id=eq.'+row.id,{audio_path:dataUrl(au.mime,au.data)});
+  const start=+(+s.start_secs+shift).toFixed(2);
+  let end=+(+s.end_secs+shift).toFixed(2);
+  if(dur>(end-start)+0.3){
+   const delta=dur-(end-start)+0.5;end=+(end+delta).toFixed(2);shift+=delta;
+   await R.patch('scenes?id=eq.'+s.id,{end_secs:end});
+   const later=await R.get('scenes?select=id,start_secs,end_secs&project_id=eq.'+p.id+'&scene_id=gt.'+s.scene_id);
+   for(const l of later)await R.patch('scenes?id=eq.'+l.id,{start_secs:+(+l.start_secs+delta).toFixed(2),end_secs:+(+l.end_secs+delta).toFixed(2)});
+  }
+  await setJobRun(p.id,'voice','Scene '+s.scene_id+'/'+scenes.length+' voice done');
+  await sleep(1200);
+ }
+ await setJob(p.id,'voice','completed',scenes.length+' scene voiceovers — scene durations voice se auto-synced');
+}
+/* ---------- STEP: captions (real timing logic, reused) ---------- */
+async function doCaptions(p){
+ const scenes=await R.get('scenes?select=*&project_id=eq.'+p.id+'&order=scene_id');
+ if(!scenes.length)throw new Error('Pehle scenes banao.');
+ const cues=cuesFromScenes(scenes);
+ await R.del('captions?project_id=eq.'+p.id);
+ for(const c of cues)await R.post('captions',{project_id:p.id,text:c.text,start_secs:+c.start.toFixed(2),end_secs:+c.end.toFixed(2)});
+ await setJob(p.id,'caption','completed',cues.length+' cues generated from scenes');
+}
+/* ---------- STEP: render (canvas + Web Audio + MediaRecorder) ---------- */
+async function doRender(p,onProg){
+ const scenes=await R.get('scenes?select=*&project_id=eq.'+p.id+'&order=scene_id');
+ if(!scenes.length)throw new Error('Scenes missing hain.');
+ const v=validateScenes(scenes,p);
+ if(!v.ok)throw new Error('Validation: '+v.errs[0]);
+ const assets=await R.get('assets?select=*&project_id=eq.'+p.id);
+ const am={};assets.forEach(a=>{if(a.scene_id&&!am[a.scene_id])am[a.scene_id]=a;});
+ const voices=await R.get('voiceovers?select=*&project_id=eq.'+p.id);
+ const vm={};voices.forEach(x=>{if(x.scene_id)vm[x.scene_id]=x;});
+ for(const s of scenes){
+  const a=am[s.scene_id];
+  if(!a||!imgFor(a))throw new Error('Scene '+s.scene_id+' ki image missing — Visuals step chalao.');
+  const vv=vm[s.scene_id];
+  if(!vv||!audFor(vv))throw new Error('Scene '+s.scene_id+' ka voiceover missing — Voice step chalao.');
+ }
+ const imgs=[];
+ for(const s of scenes)imgs.push(await loadImg(imgFor(am[s.scene_id])));
+ const bufs=[];
+ for(const s of scenes){const r=await audioBuf(audFor(vm[s.scene_id]));bufs.push(r.buf);}
+ const AC=audioBuf._c;
+ const caps=await R.get('captions?select=text,start_secs,end_secs&project_id=eq.'+p.id+'&order=start_secs').catch(()=>[]);
+ const W=p.video_type==='short'?1080:1920,H=p.video_type==='short'?1920:1080;
+ const cv=document.createElement('canvas');cv.width=W;cv.height=H;
+ const cx=cv.getContext('2d');
+ const dest=AC.createMediaStreamDestination();
+ const t0=AC.currentTime+0.4;
+ scenes.forEach((s,i)=>{
+  const src=AC.createBufferSource();src.buffer=bufs[i];
+  src.connect(dest);try{src.connect(AC.destination);}catch(e){}
+  src.start(Math.max(t0,t0+s.start_secs));
+ });
+ const stream=cv.captureStream(30);
+ const tracks=stream.getVideoTracks().concat(dest.stream.getAudioTracks());
+ if(!tracks.length)throw new Error('Canvas capture fail — browser support check karo.');
+ const mime=['video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm'].find(m=>window.MediaRecorder&&MediaRecorder.isTypeSupported(m));
+ if(!mime)throw new Error('Is browser me MediaRecorder/webm support nahi hai.');
+ const rec=new MediaRecorder(new MediaStream(tracks),{mimeType:mime,videoBitsPerSecond:p.video_type==='short'?6000000:8000000});
+ const chunks=[];rec.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data);};
+ const doneP=new Promise(res=>{rec.onstop=res;});
+ rec.start(500);
+ const total=+scenes[scenes.length-1].end_secs;
+ await setJobRun(p.id,'render','Rendering… 0%');
+ let lastPct=-1;
+ const fs=Math.round(W/16);
+ await new Promise(resolve=>{
+  function frame(){
+   const t=AC.currentTime-t0;   // audio clock = perfect A/V sync
+   if(t>=total){resolve();return;}
+   let idx=scenes.findIndex(s=>t>=+s.start_secs&&t<+s.end_secs);
+   if(idx<0)idx=t<+scenes[0].start_secs?0:scenes.length-1;
+   const s=scenes[idx];
+   const k=Math.min(1,Math.max(0,(t-s.start_secs)/Math.max(0.01,(s.end_secs-s.start_secs))));
+   cx.fillStyle='#000';cx.fillRect(0,0,W,H);
+   drawCoverCtx(cx,imgs[idx],W,H,1+0.12*k,(k-0.5)*0.08);
+   const XF=0.6;
+   if(idx<scenes.length-1&&t>s.end_secs-XF)drawCoverCtx(cx,imgs[idx+1],W,H,1,0,(t-(s.end_secs-XF))/XF);
+   const cue=caps.find(c=>t>=+c.start_secs&&t<+c.end_secs);
+   const capText=cue?cue.text:(s.caption||'');
+   if(capText){
+    const lines=splitLen(capText,34).slice(-2);
+    cx.font='800 '+fs+'px system-ui,-apple-system,sans-serif';cx.textAlign='center';cx.textBaseline='bottom';
+    const lh=fs*1.28,y0=H*0.90;
+    lines.forEach((ln,i)=>{
+     const y=y0-(lines.length-1-i)*lh;
+     cx.lineWidth=Math.max(4,Math.round(fs/7));cx.strokeStyle='rgba(0,0,0,0.88)';cx.lineJoin='round';
+     cx.strokeText(ln,W/2,y);cx.fillStyle='#fff';cx.fillText(ln,W/2,y);
+    });
+   }
+   const pct=Math.max(0,Math.min(99,Math.round(t/total*100)));
+   if(pct!==lastPct){lastPct=pct;if(onProg)onProg(pct);}
+   requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+ });
+ rec.stop();await doneP;
+ _renderBlob=new Blob(chunks,{type:'video/webm'});
+ if(_renderUrl)URL.revokeObjectURL(_renderUrl);
+ _renderUrl=URL.createObjectURL(_renderBlob);
+ const rj=(await R.get('render_jobs?select=id&project_id=eq.'+p.id+'&order=created_at.desc&limit=1'))[0];
+ if(rj)await R.patch('render_jobs?id=eq.'+rj.id,{status:'completed',progress:100,output_path:null,error:null,updated_at:new Date().toISOString()});
+ await setJob(p.id,'render','completed','Rendered '+total.toFixed(0)+'s webm ('+(_renderBlob.size/1048576).toFixed(1)+' MB) — isi session me download karo');
+ return{url:_renderUrl,blob:_renderBlob,total:total};
+}
+/* ---------- STEP: thumbnail (3 concepts, user picks) ---------- */
+async function doThumbnails(p){
+ const assets=await R.get('assets?select=*&project_id=eq.'+p.id+'&order=created_at');
+ if(!assets.length||!imgFor(assets[0]))throw new Error('Pehle Visuals generate karo.');
+ const img=await loadImg(imgFor(assets[0]));
+ let heads=[];
+ try{
+  const r=await gText('Video topic: "'+p.topic+'". Give 3 YouTube thumbnail headlines in '+p.language+', each 3 to 6 words, punchy and clickable (emoji allowed). Reply ONLY as JSON: {"headlines":["...","...","..."]}. No markdown.',true);
+  heads=(r.headlines||[]).slice(0,3).map(h=>String(h).slice(0,42));
+ }catch(e){heads=[];}
+ while(heads.length<3)heads.push(p.topic.slice(0,42));
+ const urls=[];
+ for(let i=0;i<3;i++){
+  const c=document.createElement('canvas');c.width=1280;c.height=720;
+  const x=c.getContext('2d');
+  drawCoverCtx(x,img,1280,720,1.08,(i-1)*0.04);
+  const g=x.createLinearGradient(0,280,0,720);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(1,'rgba(0,0,0,0.78)');
+  x.fillStyle=g;x.fillRect(0,0,1280,720);
+  if(i===0){x.fillStyle='#d4af37';x.fillRect(90,86,200,22);}
+  if(i===2){x.fillStyle='rgba(212,175,55,0.9)';x.beginPath();x.arc(1150,120,64,0,7);x.fill();x.fillStyle='#141414';x.font='900 64px system-ui';x.textAlign='center';x.textBaseline='middle';x.fillText('!',1150,124);}
+  const hl=heads[i]||p.topic;
+  const fs=i===0?96:88;
+  const lines=splitLen(hl,18).slice(-2);
+  x.font='900 '+fs+'px system-ui,-apple-system,sans-serif';x.textAlign='center';x.textBaseline='bottom';
+  const col=i===1?'#ffffff':'#f5d76e';
+  lines.forEach((ln,j)=>{
+   const y=684-(lines.length-1-j)*(fs*1.18);
+   x.lineWidth=10;x.strokeStyle='rgba(0,0,0,0.92)';x.lineJoin='round';
+   x.strokeText(ln,640,y);x.fillStyle=col;x.fillText(ln,640,y);
+  });
+  urls.push({url:c.toDataURL('image/jpeg',0.85),headline:hl});
+ }
+ await R.del('thumbnails?project_id=eq.'+p.id);
+ const ids=[];
+ for(let i=0;i<3;i++){
+  const r=(await R.post('thumbnails',{project_id:p.id,concept:i+1,image_path:urls[i].url,headline:urls[i].headline,status:'completed',selected:false}))[0];
+  ids.push(r.id);
+ }
+ await setJob(p.id,'thumbnail','completed','3 concepts ready — neeche se pick karo');
+ openModal('<h2 style="margin-bottom:4px">Thumbnail pick karo</h2><div class="ph-sub">3 concepts — pasand aaye to "Use this" dabao.</div>'+
+  urls.map((u,i)=>'<div style="margin-bottom:14px"><img src="'+u.url+'" style="width:100%;border-radius:10px;border:1px solid var(--line)" alt="thumbnail concept '+(i+1)+'"><div style="display:flex;gap:8px;margin-top:6px;align-items:center"><span style="font-size:13px;color:var(--mut)">"'+esc(u.headline)+'"</span><span style="flex:1"></span><button class="btn sm primary" onclick="pickThumb(\''+p.id+'\',\''+ids[i]+'\')">Use this</button></div></div>').join('')+
+  '<div style="display:flex;gap:8px"><button class="btn sm" onclick="closeModal()">Close</button><button class="btn sm" id="thRe">↻ Regenerate</button></div>');
+ $('#thRe').onclick=async()=>{closeModal();try{await doThumbnails(p);}catch(e){toast('❌ '+e.message);}};
+}
+window.pickThumb=async function(pid,tid){
+ const all=await R.get('thumbnails?select=id&project_id=eq.'+pid);
+ for(const a of all)await R.patch('thumbnails?id=eq.'+a.id,{selected:a.id===tid});
+ closeModal();toast('Thumbnail selected ✓');
+};
+/* ---------- YouTube OAuth + upload ---------- */
+function ytToken(){
+ const t=sessionStorage.getItem('cp_yt_token'),exp=+sessionStorage.getItem('cp_yt_exp')||0;
+ return (t&&Date.now()<exp-60000)?t:null;
+}
+function ytOAuth(returnHash){
+ const cid=(localStorage.getItem(LS.oc)||'').trim();
+ if(!cid||!/\.apps\.googleusercontent\.com$/.test(cid)){toast('Settings me Google OAuth Client ID add karo');location.hash='#/settings';return false;}
+ sessionStorage.setItem('cp_oauth_return',returnHash||location.hash||'#/dashboard');
+ const ru=location.origin+location.pathname;
+ location.href='https://accounts.google.com/o/oauth2/v2/auth?client_id='+encodeURIComponent(cid)+'&redirect_uri='+encodeURIComponent(ru)+'&response_type=token&scope='+encodeURIComponent('https://www.googleapis.com/auth/youtube.upload')+'&state=cp';
+ return true;
+}
+window.ytOAuth=ytOAuth;
+async function doUpload(p){
+ const d=(await R.get('youtube_uploads?select=*&project_id=eq.'+p.id+'&order=created_at.desc&limit=1'))[0];
+ if(!d)throw new Error('SEO draft missing — pehle SEO section se "Save as upload draft" karo.');
+ if(!d.title)throw new Error('Draft me title missing hai.');
+ if(!_renderBlob)throw new Error('Rendered video is session me nahi hai — pehle Render step chalao.');
+ const tok=ytToken();
+ if(!tok){ytOAuth('#/project/'+p.id);const e=new Error('OAUTH_REDIRECT');throw e;}
+ await setJobRun(p.id,'upload','Uploading… 0%');
+ await R.patch('youtube_uploads?id=eq.'+d.id,{status:'uploading',error:null});
+ try{
+  const desc=(d.description||'')+'\n\n🤖 AI disclosure: Is video ki script, voiceover aur visuals AI tools (Google Gemini) se generate kiye gaye hain.';
+  const meta={snippet:{title:d.title,description:desc,tags:(d.tags||[]).slice(0,30),categoryId:'1'},status:{privacyStatus:['public','unlisted','private'].includes(d.visibility)?d.visibility:'private',selfDeclaredMadeForKids:false}};
+  const init=await fetch('https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumable&part=snippet,status',{method:'POST',headers:{'Authorization':'Bearer '+tok,'Content-Type':'application/json; charset=UTF-8','X-Upload-Content-Length':String(_renderBlob.size),'X-Upload-Content-Type':'video/webm'},body:JSON.stringify(meta)});
+  if(!init.ok){const t=await init.text().catch(()=> '');throw new Error('YouTube init fail ('+init.status+'): '+t.slice(0,160));}
+  const upUrl=init.headers.get('location');
+  if(!upUrl)throw new Error('YouTube ne upload URL nahi diya.');
+  const CH=8*1048576;let off=0,vid=null;
+  while(off<_renderBlob.size){
+   const end=Math.min(off+CH,_renderBlob.size);
+   const rr=await fetch(upUrl,{method:'PUT',headers:{'Authorization':'Bearer '+tok,'Content-Length':String(end-off),'Content-Range':'bytes '+off+'-'+(end-1)+'/'+_renderBlob.size},body:_renderBlob.slice(off,end)});
+   if(rr.status===308){const rg=rr.headers.get('range');off=rg?parseInt(rg.split('-')[1],10)+1:end;}
+   else if(rr.ok){vid=(await rr.json()).id;off=end;}
+   else{const t=await rr.text().catch(()=> '');throw new Error('Upload fail ('+rr.status+'): '+t.slice(0,160));}
+   await setJobRun(p.id,'upload','Uploading… '+Math.round(off/_renderBlob.size*90)+'%');
+  }
+  if(!vid)throw new Error('YouTube ne video ID nahi diya.');
+  try{
+   const th=(await R.get('thumbnails?select=image_path&project_id=eq.'+p.id+'&selected=eq.true&order=created_at.desc&limit=1'))[0]
+    ||(await R.get('thumbnails?select=image_path&project_id=eq.'+p.id+'&order=created_at.desc&limit=1'))[0];
+   if(th&&th.image_path){
+    const bl=await (await fetch(th.image_path)).blob();
+    await fetch('https://www.googleapis.com/upload/youtube/v3/thumbnails/set?videoId='+encodeURIComponent(vid),{method:'POST',headers:{'Authorization':'Bearer '+tok,'Content-Type':bl.type||'image/jpeg'},body:bl});
+   }
+  }catch(e){/* thumbnail optional — video upload hi asli kaam hai */}
+  await R.patch('youtube_uploads?id=eq.'+d.id,{status:'completed',yt_video_id:vid,error:null});
+  await setJob(p.id,'upload','completed','Uploaded: https://youtu.be/'+vid+' — Studio me "altered content" disclosure tick karna na bhoolo');
+ }catch(e){
+  if(e&&e.message==='OAUTH_REDIRECT')throw e;
+  await R.patch('youtube_uploads?id=eq.'+d.id,{status:'failed',error:String(e.message).slice(0,500)});
+  throw e;
+ }
+}
+/* ---------- job runner (deterministic order, per-step retry) ---------- */
+async function runStep(pid,step){
+ const p=(await R.get('projects?select=*&id=eq.'+pid))[0];
+ if(!p)throw new Error('Project not found');
+ await setJobRun(pid,step,'Running…');
+ try{
+  if(step==='research')await doResearch(p);
+  else if(step==='script')await doAIScript(p);
+  else if(step==='scene'){
+   const ss=await R.get('scenes?select=*&project_id=eq.'+pid+'&order=scene_id');
+   const vv=validateScenes(ss,p);
+   if(!vv.ok)throw new Error(vv.errs[0]);
+   await setJob(pid,step,'completed','Validated: '+ss.length+' scenes locked, '+vv.total.toFixed(1)+'s timeline');
+  }
+  else if(step==='visual')await doVisuals(p);
+  else if(step==='voice')await doVoice(p);
+  else if(step==='caption')await doCaptions(p);
+  else if(step==='render')await doRender(p,function(pct){
+   const b=document.getElementById('renProg');if(b)b.style.width=pct+'%';
+   const t=document.getElementById('renPct');if(t)t.textContent=pct+'%';
+  });
+  else if(step==='thumbnail')await doThumbnails(p);
+  else if(step==='upload')await doUpload(p);
+ }catch(e){
+  if(e&&e.message==='OAUTH_REDIRECT'){await setJobRun(pid,step,'Google sign-in ke liye redirect ho raha hai…');return 'oauth';}
+  await setJobErr(pid,step,e.noKey?'Gemini API key missing — Settings me apni free key add karo.':e.message);
+  throw e;
+ }
+}
+async function runAll(pid){
+ for(const s of STEPS){
+  const m=await jobMap(pid);
+  if(m[s[0]]&&m[s[0]].status==='completed')continue;
+  toast('▶ '+s[1]+'…');
+  try{const r=await runStep(pid,s[0]);if(r==='oauth')return;}
+  catch(e){toast('❌ '+s[1]+' fail: '+(e.noKey?'API key missing — Settings me add karo':String(e.message).slice(0,140)));return;}
+ }
+ toast('✅ Pipeline complete!');
+ await refreshProgress(pid);
+}
+window.runStep=runStep;window.runAll=runAll;
+window.runOne=async function(pid,step){
+ try{await runStep(pid,step);toast('✅ Done: '+step);}
+ catch(e){if(e&&e.message!=='OAUTH_REDIRECT')toast('❌ '+(e.noKey?'Settings me Gemini API key add karo':String(e.message).slice(0,160)));}
+ nav();
+};
+/* ---------- research section UI ---------- */
+async function renderResearchSec(p){
+ const el=$('#secResearch');if(!el)return;
+ const rows=await R.get('research_sources?select=*&project_id=eq.'+p.id+'&order=created_at').catch(()=>[]);
+ let h='<div class="panel"><h2>🔎 Research</h2><div class="ph-sub">Gemini se facts + sources. Sirf <b>tick-verified</b> facts AI script me use honge.</div>';
+ if(!rows.length)h+='<div class="empty" style="padding:14px">No research yet — neeche button dabao.</div>';
+ else h+='<table class="tbl"><tr><th style="width:36px">✓</th><th>Fact</th><th>Source</th></tr>'+rows.map(r=>'<tr><td><input type="checkbox" data-v="'+r.id+'"'+(r.verified?' checked':'')+' style="width:18px;height:18px;accent-color:#d4af37"></td><td>'+esc(r.claim)+'</td><td>'+(r.url?'<a href="'+esc(r.url)+'" target="_blank" rel="noopener">'+esc(r.source||'link')+'</a>':esc(r.source||'—'))+'</td></tr>').join('')+'</table>';
+ h+='<div style="margin-top:10px"><button class="btn primary sm" id="resGo">🔎 Research with AI</button></div></div>';
+ el.innerHTML=h;
+ $('#resGo').onclick=async()=>{
+  const b=$('#resGo');b.disabled=true;
+  try{await runStep(p.id,'research');toast('✅ Research done — facts verify karke tick karo');}
+  catch(e){toast('❌ '+(e.noKey?'Settings me Gemini API key add karo':String(e.message).slice(0,160)));}
+  b.disabled=false;nav();
+ };
+ el.querySelectorAll('[data-v]').forEach(cb=>{cb.onchange=async()=>{await R.patch('research_sources?id=eq.'+cb.dataset.v,{verified:cb.checked});toast(cb.checked?'Verified ✓':'Unverified');};});
+}
+/* ---------- render section UI ---------- */
+async function renderRenderSec(p){
+ const el=$('#secRender');if(!el)return;
+ const m=await jobMap(p.id);
+ const rj=m['render'];
+ let h='<div class="panel"><h2>🎬 Render</h2><div class="ph-sub">Browser me asli video render — scene images (Ken Burns), voiceover sync (Web Audio), captions burn, crossfade. Output: downloadable <b>.webm</b>.</div>';
+ h+='<div class="pbar" style="margin:10px 0"><i id="renProg" style="width:0%"></i></div><div id="renPct" style="color:var(--dim);font-size:12.5px;margin-bottom:8px"></div>';
+ h+='<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn primary sm" id="renGo">🎬 Render video</button>';
+ if(_renderUrl)h+='<a class="btn sm" href="'+_renderUrl+'" download="creatorpilot-'+p.id.slice(0,8)+'.webm">⬇ Download .webm</a>';
+ h+='</div><div id="renVid"></div>';
+ if(rj&&rj.detail)h+='<div class="note" style="margin-top:10px">'+esc(rj.detail)+'</div>';
+ h+='<div class="note"><b>Honest:</b> rendered video isi browser session me rehta hai — page reload par khatam ho jayega. Download karke save karo, aur Upload step isi session me chalao.</div></div>';
+ el.innerHTML=h;
+ if(_renderUrl)$('#renVid').innerHTML='<video src="'+_renderUrl+'" controls style="width:100%;max-width:420px;border-radius:10px;margin-top:10px"></video>';
+ $('#renGo').onclick=async()=>{
+  const b=$('#renGo');b.disabled=true;
+  try{await runStep(p.id,'render');toast('✅ Render complete — download karo');}
+  catch(e){toast('❌ '+(e.noKey?'Settings me Gemini API key add karo':String(e.message).slice(0,180)));}
+  b.disabled=false;nav();
+ };
+}
+/* ---------- settings page ---------- */
+function pgSettings(){
+ const k=gkey(),mc=gmodel(),ic=gimgmodel(),tc=gttsmodel(),oc=(localStorage.getItem(LS.oc)||'').trim();
+ const yt=!!ytToken();
+ app().innerHTML=`<div class="panel" style="max-width:720px"><h2>⚙️ Settings — API Keys</h2><div class="ph-sub">Keys sirf <b>is browser ke localStorage</b> me rehti hain — kahin upload nahi hoti. AI calls seedha Google ke API ko jaati hain.</div>
+ <h3>Gemini API key (free)</h3>
+ <div class="field"><label>API key</label><input class="inp" id="sKey" type="password" autocomplete="off" placeholder="AIza..." value="${esc(k)}"></div>
+ <div class="grid2">
+  <div class="field"><label>Text model</label><input class="inp" id="sM" value="${esc(mc)}"></div>
+  <div class="field"><label>Image model</label><input class="inp" id="sI" value="${esc(ic)}"></div>
+ </div>
+ <div class="field"><label>TTS model</label><input class="inp" id="sT" value="${esc(tc)}"></div>
+ <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px"><button class="btn primary sm" id="sSave">💾 Save</button><button class="btn sm" id="sTest">🧪 Test key</button><button class="btn sm danger" id="sDel">Remove key</button></div>
+ <div class="note"><b>Free key kaise lein (3 steps):</b><br>1. <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a> kholo → "Create API key" dabao.<br>2. Key copy karke upar paste karo → Save.<br>3. <b>Important:</b> Google Cloud Console → APIs & Services → Credentials → apni key → "HTTP referrers" me <code>${esc(location.origin)}/*</code> add karo, taaki key sirf is site par chale.<br><span style="color:var(--dim)">Free-tier limits: text quota generous hai; image/TTS par roz ki limit hoti hai — 429 aaye to thodi der baad Retry dabao.</span></div>
+ <h3>YouTube upload (OAuth)</h3>
+ <div class="field"><label>Google OAuth Client ID (apna)</label><input class="inp" id="sOc" autocomplete="off" placeholder="xxxx.apps.googleusercontent.com" value="${esc(oc)}"></div>
+ <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px"><button class="btn primary sm" id="sOcSave">💾 Save Client ID</button>${yt?'<button class="btn sm" id="sYtOut">Disconnect YouTube</button>':'<button class="btn sm" id="sYtIn">🔗 Connect YouTube</button>'}</div>
+ <div style="font-size:12.5px;color:var(--dim);margin-bottom:6px">Status: ${yt?'<span style="color:#3ecf6e">connected (session only)</span>':'<span style="color:#ffb020">not connected</span>'}</div>
+ <div class="note"><b>Client ID kaise banayein:</b><br>1. <a href="https://console.cloud.google.com/" target="_blank" rel="noopener">console.cloud.google.com</a> → naya project → <b>YouTube Data API v3</b> enable karo.<br>2. OAuth consent screen → External → app name bharo → test user me apna Gmail add karo.<br>3. Credentials → Create Credentials → <b>OAuth client ID</b> → type <b>Web application</b> → Authorized redirect URI me ye exact add karo:<br><code>${esc(location.origin+location.pathname)}</code><br>4. Client ID copy karke upar paste karo → Save → Connect YouTube.<br><span style="color:var(--dim)">Note: Google "unverified app" warning dikhayega — personal use ke liye normal hai (Advanced → continue). Token sirf session me rehta hai — tab band = logout.</span></div>
+ </div>`;
+ $('#sSave').onclick=()=>{
+  localStorage.setItem(LS.gk,$('#sKey').value.trim());
+  localStorage.setItem(LS.gm,$('#sM').value.trim()||'gemini-2.0-flash');
+  localStorage.setItem(LS.gi,$('#sI').value.trim()||'gemini-2.0-flash-preview-image-generation');
+  localStorage.setItem(LS.gt,$('#sT').value.trim()||'gemini-2.5-flash-preview-tts');
+  toast('Saved — key sirf is browser me hai');
+ };
+ $('#sTest').onclick=async()=>{
+  const b=$('#sTest');b.disabled=true;
+  try{const t=await gText('Reply with exactly: OK');toast(/^\s*OK/.test(t)?'✅ Key kaam kar rahi hai!':'⚠️ Jawab aaya lekin ajeeb: '+t.slice(0,60));}
+  catch(e){toast('❌ '+(e.noKey?'Pehle key save karo':e.message));}
+  b.disabled=false;
+ };
+ $('#sDel').onclick=()=>{localStorage.removeItem(LS.gk);$('#sKey').value='';toast('Key removed');};
+ $('#sOcSave').onclick=()=>{
+  const v=$('#sOc').value.trim();
+  if(v&&!/\.apps\.googleusercontent\.com$/.test(v)){toast('Client ID ".apps.googleusercontent.com" par khatam hona chahiye');return;}
+  localStorage.setItem(LS.oc,v);toast('Client ID saved');nav();
+ };
+ const yi=$('#sYtIn');if(yi)yi.onclick=()=>ytOAuth('#/settings');
+ const yo=$('#sYtOut');if(yo)yo.onclick=()=>{sessionStorage.removeItem('cp_yt_token');sessionStorage.removeItem('cp_yt_exp');toast('YouTube disconnected');nav();};
+}
+/* ---------- OAuth redirect return (before router) ---------- */
+function oauthReturn(){
+ try{
+  const h=location.hash||'';
+  if(h.indexOf('access_token=')>=0){
+   const ps=Object.fromEntries(new URLSearchParams(h.charAt(0)==='#'?h.slice(1):h));
+   if(ps.access_token){
+    sessionStorage.setItem('cp_yt_token',ps.access_token);
+    sessionStorage.setItem('cp_yt_exp',String(Date.now()+(parseInt(ps.expires_in||'3599',10)*1000)));
+   }
+   const ret=sessionStorage.getItem('cp_oauth_return')||'#/dashboard';
+   history.replaceState(null,'',location.pathname+location.search);
+   location.hash=ret;
+   setTimeout(()=>toast('YouTube connected ✓'),400);
+  }
+ }catch(e){}
+}
 /* ============ init ============ */
+oauthReturn();
 nav();
+
 </script>
 </body>
 </html>
